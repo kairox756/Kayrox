@@ -78,7 +78,62 @@
       <div class="modal-content">
         <span class="close" onclick="document.getElementById('mikModal').style.display='none'">&times;</span>
         <pre><code>
-        <!-- Aquí va tu código MikCode -->
+startf
+{
+    info mikoCore();
+    {
+        Kayrox UI (1.0);
+        Kayrox Core (Orion);
+        Kayrox Version (1.0.1.0.NES) codename("vainilla");
+        Architecture("x64, x86")
+}
+
+        info mikoUI();
+        {
+            GUIMIK.version("1.0.0.UIMIKES");
+            codename("latte");
+
+            GUIMIK = 1.0.0.UIMIKES;
+            codename = latte;
+    }
+
+def framework
+{
+    program("Visual Studio");
+    version_program("2019");
+
+    def lenguajes{
+        lenguaje_kayutil("C#")
+
+        def entorno{
+            development_environment("NET Framework 4.8")
+            development_template("Applications with Windows Forms")
+
+            def plataformas{
+                macOS = False
+                Windows = True
+                Linux = False 
+
+                def supported_windows_version{
+                versions[
+                        7, 8, 8.1, 10, 11
+                    ]
+                    unsuported_versions[
+                        vista, xp, me, 2000, 98, 95, 3.1, 3.0, 2.0, 1,0
+                        ]
+                    def type_of_application{
+                        toP = Desktop
+                    }
+                }
+            }
+        }
+    }
+}
+
+aplicacion_desktop_for_windows():
+version_program(0.1.0.0.ACKAYBT);
+}
+endf
         </code></pre>
       </div>
     </div>
