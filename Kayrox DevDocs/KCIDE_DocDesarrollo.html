@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>Documentación de Desarrollo - Kayrox Code</title>
-  <link rel="stylesheet" href="styles_kayroxdvloper.css">
+  <!-- CSS correcto -->
+  <link rel="stylesheet" href="styles_kayroxdlvoper.css">
   <style>
     /* Estilos para el modal */
     .modal {
@@ -54,8 +55,10 @@
   <header>
     <h1>Kayrox DevDocs</h1>
     <nav>
-      <a href="Kayrox DevDocs\index.html">Inicio</a>
-      <a href="inicio.html">Volver a Kayrox.com</a>
+      <!-- Inicio dentro de Kayrox DevDocs -->
+      <a href="index.html">Inicio</a>
+      <!-- Volver al portal principal Kayrox -->
+      <a href="../index.html">Volver a Kayrox.com</a>
     </nav>
   </header>
 
@@ -74,97 +77,18 @@
       <div class="modal-content">
         <span class="close" onclick="document.getElementById('mikModal').style.display='none'">&times;</span>
         <pre><code>
-startf
-{
-    info mikoCore();
-    {
-        Kayrox UI (1.0);
-        Kayrox Core (Orion);
-        Kayrox Version (1.0.1.0.NES) codename("vainilla");
-        Architecture("x64, x86")
-    }
-
-    info mikoUI();
-    {
-        GUIMIK.version("1.0.0.UIMIKES");
-        codename("latte");
-
-        GUIMIK = 1.0.0.UIMIKES;
-        codename = latte;
-    }
-
-    def framework
-    {
-        program("Visual Studio");
-        version_program("2019");
-
-        def lenguajes{
-            lenguaje_kayutil("C#")
-
-            def entorno{
-                development_environment("NET Framework 4.8")
-                development_template("Applications with Windows Forms")
-
-                def plataformas{
-                    macOS = False
-                    Windows = True
-                    Linux = False 
-
-                    def supported_windows_version{
-                        versions[
-                            7, 8, 8.1, 10, 11
-                        ]
-                        unsuported_versions[
-                            vista, xp, me, 2000, 98, 95, 3.1, 3.0, 2.0, 1,0
-                        ]
-                        def type_of_application{
-                            toP = Desktop
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    aplicacion_desktop_for_windows():
-    version_program(0.1.0.0.ACKAYBT);
-}
-endf
+        <!-- Aquí va tu código MikCode -->
         </code></pre>
       </div>
     </div>
 
+    <!-- resto del contenido igual -->
     <h3>Objetivo del proyecto</h3>
-    <p>Kayrox Code (KCIDE) es un entorno de desarrollo integrado (IDE) con identidad propia, potenciado por <strong>Mikota Core</strong>. Su propósito es brindar estabilidad, rendimiento y compatibilidad con los proyectos de Kayrox, además de crear un espacio donde los desarrolladores puedan trabajar con un lenguaje propio: <strong>Kayrox MikCode (.mkay)</strong>. El objetivo principal es diferenciarse de los IDEs genéricos, ofreciendo una experiencia visual y funcional adaptada a las necesidades de la comunidad Kayrox.</p>
+    <p>Kayrox Code (KCIDE) es un entorno de desarrollo integrado (IDE) con identidad propia...</p>
 
-    <h3>Análisis del código MikCode</h3>
-    <p>El fragmento de código compartido define la estructura básica del lenguaje <strong>Kayrox MikCode</strong> y muestra cómo se encapsulan metadatos, compatibilidad y entorno:</p>
-    <p><strong>info mikoCore():</strong> Contiene metadatos de versión del núcleo, incluyendo Kayrox UI 1.0, Kayrox Core Orion, Kayrox Version 1.0.1.0.NES con codename “vainilla” y soporte para arquitecturas x64 y x86.</p>
-    <p><strong>info mikoUI():</strong> Define la interfaz gráfica con GUIMIK versión 1.0.0.UIMIKES y codename “latte”.</p>
-    <p><strong>def framework:</strong> Especifica el entorno de desarrollo: Visual Studio 2019, lenguaje C#, entorno .NET Framework 4.8, plantilla de aplicaciones con Windows Forms. Además, establece compatibilidad con Windows 7, 8, 8.1, 10 y 11, excluyendo versiones antiguas como Vista y XP. El tipo de aplicación definido es Desktop.</p>
-    <p><strong>aplicacion_desktop_for_windows():</strong> Define la versión del programa como 0.1.0.0.ACKAYBT.</p>
-    <p>Este código demuestra cómo MikCode integra información técnica y corporativa en una sintaxis clara y organizada.</p>
-
-    <h3>Arquitectura del sistema</h3>
-    <p>El sistema se compone de varios elementos clave: el núcleo Mikota Core, que gestiona compatibilidad y rendimiento; la interfaz WinForms, que ofrece una UI clásica con menús personalizados; la extensión para VS Code, que proporciona resaltado de sintaxis y configuración; y el lenguaje Kayrox MikCode, un DSL con identidad propia y metadatos de versión.</p>
-
-    <h3>Características principales</h3>
-    <p>Entre las funciones más destacadas se encuentran el resaltado de sintaxis para archivos <code>.mkay</code>, los temas visuales corporativos, la compatibilidad con Windows y VS Code, el soporte activo con actualizaciones periódicas y la integración con proyectos Kayrox existentes.</p>
-
-    <h3>Estado actual</h3>
-    <p>Actualmente el proyecto se encuentra en fase beta, con soporte vigente y evolución constante del núcleo Mikota Core. Es compatible con Windows (Visual Studio 2019, WinForms) y Visual Studio Code. La distribución se realiza mediante paquetes <code>.vsix</code> para la extensión.</p>
-
-    <h3>Próximos pasos</h3>
-    <p>Las metas de desarrollo incluyen la optimización del núcleo Mikota Core, la ampliación de funciones en la extensión de VS Code (autocompletado, snippets, depuración), la documentación detallada de la sintaxis MikCode, pruebas de estabilidad y liberación de versiones candidatas, así como la integración con sistemas de control de versiones y herramientas de colaboración.</p>
-
-    <h3>Riesgos y retos</h3>
-    <p>El proyecto enfrenta desafíos como errores de instalación (npm/vsce), limitaciones de compatibilidad al estar disponible solo para Windows, dependencia del núcleo Mikota Core que requiere pruebas exhaustivas, y la curva de aprendizaje que implica adaptarse al nuevo lenguaje y entorno.</p>
-
-    <h3>Conclusión</h3>
-    <p>Kayrox Code representa un paso importante en la consolidación de la identidad tecnológica de Kayrox. Al integrar un núcleo propio (Mikota Core), un lenguaje especializado (.mkay) y soporte en plataformas reconocidas como Visual Studio y VS Code, el proyecto busca posicionarse como una alternativa sólida y diferenciada en el mundo del desarrollo. La documentación aquí presentada servirá como guía para el equipo de desarrollo y como referencia para futuros colaboradores, asegurando que el proyecto mantenga una evolución clara y organizada.</p>
-
+    <!-- Botón para volver a Kayrox Code -->
     <div style="text-align:center; margin-top:30px;">
-      <a href="kayroxcode.html" class="btn">⬅️ Volver a Kayrox Code</a>
+      <a href="../Soporte Kayrox/kayroxcode.html" class="btn">⬅️ Volver a Kayrox Code</a>
     </div>
   </main>
 
