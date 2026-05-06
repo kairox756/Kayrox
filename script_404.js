@@ -1,6 +1,5 @@
-// script.js
 function verificarRuta(ruta) {
-  fetch(ruta)
+  fetch(ruta, { method: "HEAD" }) // solo pide cabeceras
     .then(response => {
       if (!response.ok) {
         window.location.href = "/Error 404/404.html";
@@ -11,8 +10,6 @@ function verificarRuta(ruta) {
     });
 }
 
-// Ejemplo: verificar que exista la página actual
 window.onload = function() {
-  // Aquí puedes comprobar un archivo específico o la ruta actual
   verificarRuta(window.location.pathname);
 };
