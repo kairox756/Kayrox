@@ -4,7 +4,7 @@
     {
       "version": "A.0.1.0.ACKAYALP",
       "url": "https://kayrox.qzz.io/updates/update_vA.0.1.0.ACKAYALP_ider274gs247s2174.zip",
-      "notes": "Versión inicial."
+      "notes": "Versión Alpha de Kayrox Code. Esta version incluye el nucleo Mikota Core, el lenguaje de programacion desarrollado por Kayrox Software. Esta version es una version Alpha y puede contener errores y problemas de rendimiento. Se recomienda no usa en entornos de produccion y solo para pruebas de desarrollo con mikota core"
     }
   ]
 }
