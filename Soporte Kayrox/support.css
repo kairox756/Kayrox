@@ -1,0 +1,123 @@
+/* Estilo Kayrox Support con colores dinámicos en el encabezado */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background-color: #f9f9f9;
+  color: #333;
+  line-height: 1.6;
+}
+
+header {
+  background: linear-gradient(270deg, magenta, yellow, purple, cyan);
+  background-size: 600% 600%;
+  animation: gradientMove 12s ease infinite;
+  color: white;
+  padding: 20px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 1.8em;
+}
+
+nav a {
+  color: white;
+  text-decoration: none;
+  margin-left: 20px;
+  font-weight: 500;
+}
+
+nav a:hover {
+  text-decoration: underline;
+}
+
+.hero {
+  background: #f3f3f3;
+  padding: 60px 40px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+}
+
+.hero h2 {
+  margin: 0;
+  font-size: 2.2em;
+  color: #0078d4;
+}
+
+.hero p {
+  font-size: 1.1em;
+  color: #555;
+}
+
+.container {
+  width: 90%;
+  max-width: 1200px;
+  margin: 40px auto;
+}
+
+.container h3 {
+  color: #0078d4;
+  margin-top: 30px;
+  margin-bottom: 10px;
+}
+
+.container p, 
+.container ul {
+  margin-bottom: 20px;
+}
+
+.container ul {
+  padding-left: 20px;
+}
+
+.btn {
+  display: inline-block;
+  margin-top: 15px;
+  padding: 10px 20px;
+  background-color: #0078d4;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.btn:hover {
+  background-color: #005a9e;
+}
+
+footer {
+  background-color: #f1f1f1;
+  text-align: center;
+  padding: 20px;
+  font-size: 0.9em;
+  color: #555;
+  border-top: 1px solid #ddd;
+}
+
+/* Bloques de soporte */
+.support-section {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.support-section h3 {
+  margin-top: 0;
+  color: #0078d4;
+}
+
+.support-section ul li {
+  margin-bottom: 10px;
+}
+
+/* Animación de gradiente dinámico */
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
