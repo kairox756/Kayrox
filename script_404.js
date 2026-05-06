@@ -3,11 +3,11 @@ function verificarRuta(ruta) {
   fetch(ruta)
     .then(response => {
       if (!response.ok) {
-        window.location.href = "404.html";
+        window.location.href = "/Error 404/404.html";
       }
     })
     .catch(() => {
-      window.location.href = "404.html";
+      window.location.href = "/Error 404/404.html";
     });
 }
 
