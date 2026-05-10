@@ -1,1 +1,11 @@
-
+{
+  "latest": "A.0.0.1.ATEMIALPH",
+  "download_url": "https://kayrox.qzz.io/updates/MikShellA.0.0.1.ATEMIALPH.zip",
+  "release_date": "2026-05-10",
+  "changelog": [
+    "Versión inicial de MikShell",
+    "Comando update con soporte OTA",
+    "Animación de carga en descargas e instalación"
+  ],
+  "mandatory": false
+}
