@@ -1,5 +1,14 @@
 {
-  "status": "approved",
-  "wait_hours": 72,
-  "token": "abc123firmaSHA256"
+  "codes": {
+    "76Y56787J": {
+      "status": "approved",
+      "wait_hours": 72,
+      "token": "76Y56787J-SHA256-VALIDADO"
+    },
+    "KAYROX-2026-ALPHA": {
+      "status": "approved",
+      "wait_hours": 48,
+      "token": "KAYROX-2026-ALPHA-SHA256"
+    }
+  }
 }
