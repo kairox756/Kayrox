@@ -1,14 +1,25 @@
 {
   "codes": {
-    "76Y56787J": {
+    "CODE-0001-2026": {
       "status": "approved",
       "wait_hours": 72,
-      "token": "76Y56787J-SHA256-VALIDADO"
+      "token": "CODE-0001-2026-SHA256"
     },
-    "KAYROX-2026-ALPHA": {
+    "CODE-0002-2026": {
       "status": "approved",
       "wait_hours": 48,
-      "token": "KAYROX-2026-ALPHA-SHA256"
+      "token": "CODE-0002-2026-SHA256"
+    },
+    "CODE-0003-2026": {
+      "status": "approved",
+      "wait_hours": 96,
+      "token": "CODE-0003-2026-SHA256"
+    },
+    ...
+    "CODE-1000-2026": {
+      "status": "approved",
+      "wait_hours": 168,
+      "token": "CODE-1000-2026-SHA256"
     }
   }
 }
