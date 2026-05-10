@@ -1,0 +1,14 @@
+{
+  "latest": "1.0.1.0.ATEMIKEST",
+  "download_url": "https://kayrox.qzz.io/updates/MikShell1.0.1.0.ATEMIKEST.zip",
+  "release_date": "2026-05-10",
+  "changelog": [
+    "Versión inicial estable de TermMik",
+    "Sistema de liberación con validación en servidor",
+    "Soporte para múltiples códigos en release.json",
+    "Corrección de errores en manejo de JSON",
+    "Integración básica con OTA"
+  ],
+  "mandatory": false,
+  "hash": "SHA256SUM_DEL_ARCHIVO_ZIP"
+}
