@@ -1,1 +1,5 @@
-
+{
+  "status": "approved",
+  "wait_hours": 72,
+  "token": "abc123firmaSHA256"
+}
