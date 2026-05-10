@@ -15,7 +15,6 @@
       "wait_hours": 96,
       "token": "CODE-0003-2026-SHA256"
     },
-    ...
     "CODE-1000-2026": {
       "status": "approved",
       "wait_hours": 168,
