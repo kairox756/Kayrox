@@ -121,3 +121,9 @@ footer {
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
+
+.banner.finalizado {
+  background-color: #fff4ce; /* Amarillo suave estilo Microsoft */
+  color: #333;
+  border-bottom: 3px solid #ffb900; /* Amarillo corporativo */
+}
