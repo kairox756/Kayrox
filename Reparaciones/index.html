@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Kayrox | Consulta de Reparaciones</title>
+  <link rel="stylesheet" href="styles.css"> <!-- Tu CSS corporativo -->
+</head>
+<body>
+  <!-- Encabezado -->
+  <header>
+    <h1>Kayrox</h1>
+    <nav>
+      <a href="index.html">Inicio</a>
+      <a href="consulta.html">Consulta</a>
+      <a href="registro.html">Registro</a>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <h2>Consulta de Reparaciones</h2>
+    <p>Ingresa tu folio y usuario para ver el estado de tu dispositivo</p>
+  </section>
+
+  <!-- Sección de consulta -->
+  <section class="container">
+    <div class="card">
+      <h3>Kayrox | Consulta de Reparaciones</h3>
+      <form id="consultaForm">
+        <input type="text" id="folio" placeholder="Folio" required>
+        <input type="text" id="usuario" placeholder="Usuario" required>
+        <button class="btn" type="submit">Consultar</button>
+      </form>
+      <div id="resultado"></div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2026 Kayrox - Todos los derechos reservados</p>
+  </footer>
+
+  <!-- Script de consulta -->
+  <script>
+    document.getElementById("consultaForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const folio = document.getElementById("folio").value.trim();
+      const usuario = document.getElementById("usuario").value.trim();
+
+      try {
+        // Cargar JSON desde el repo
+        const response = await fetch("dispositivos.json");
+        const data = await response.json();
+
+        // Buscar coincidencia
+        const registro = data.find(item => item.folio === folio && item.usuario === usuario);
+
+        const resultadoDiv = document.getElementById("resultado");
+        if (registro) {
+          resultadoDiv.innerHTML = `
+            <p><strong>Dispositivo:</strong> ${registro.dispositivo}</p>
+            <p><strong>Modelo:</strong> ${registro.modelo}</p>
+            <p><strong>Problema:</strong> ${registro.problema}</p>
+            <p><strong>Estado:</strong> <span class="${registro.estado}">${registro.estado}</span></p>
+          `;
+        } else {
+          resultadoDiv.innerHTML = "<p>No se encontró ningún registro con ese folio y usuario.</p>";
+        }
+      } catch (error) {
+        document.getElementById("resultado").innerHTML = "<p>Error al cargar los datos.</p>";
+      }
+    });
+  </script>
+</body>
+</html>
