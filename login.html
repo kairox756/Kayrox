@@ -2,47 +2,64 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Login - Dashboard Kayrox</title>
+  <title>Dashboard - Kayrox</title>
   <link rel="stylesheet" href="styles.css"> <!-- Tu CSS externo -->
-  <!-- SDK de Firebase -->
   <script type="module">
     // Importar Firebase desde CDN
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     // Configuración de tu proyecto Firebase
     const firebaseConfig = {
-      apiKey: "TU_API_KEY",
-      authDomain: "kayrox.firebaseapp.com",
-      projectId: "kayrox",
-      storageBucket: "kayrox.appspot.com",
-      messagingSenderId: "1234567890",
-      appId: "1:1234567890:web:abcdef123456"
+      apiKey: "AIzaSyBps4a6CxXbddScEwncmO37vSiHWceNR1Q",
+      authDomain: "kayrox-17b10.firebaseapp.com",
+      projectId: "kayrox-17b10",
+      storageBucket: "kayrox-17b10.firebasestorage.app",
+      messagingSenderId: "926965928296",
+      appId: "1:926965928296:web:7d4a3f769be66852b086dd"
     };
 
     // Inicializar Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+    const db = getFirestore(app);
 
-    // Función de login
-    window.loginKayrox = function(event) {
-      event.preventDefault();
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      const message = document.getElementById("loginMessage");
+    // Verificar usuario autenticado
+    onAuthStateChanged(auth, async (user) => {
+      const dashboard = document.getElementById("dashboard");
+      const userInfo = document.getElementById("userInfo");
 
-      signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-          const user = userCredential.user;
-          message.textContent = "Acceso concedido. Bienvenido al Dashboard.";
-          message.className = "estado vigente";
-          // Redirigir al dashboard
-          window.location.href = "dashboard.html";
-        })
-        .catch((error) => {
-          message.textContent = "Credenciales incorrectas o usuario no registrado.";
-          message.className = "estado finalizado";
-        });
+      if (user) {
+        // Obtener datos del usuario desde Firestore
+        const docRef = doc(db, "usuarios", user.uid);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          userInfo.innerHTML = `
+            <h3>Bienvenido, ${data.nombre}</h3>
+            <p><strong>Folio:</strong> ${data.folio}</p>
+            <p><strong>Estado de solicitud:</strong> ${data.estado}</p>
+            <p><strong>Beneficios:</strong> ${data.beneficios}</p>
+          `;
+        } else {
+          userInfo.innerHTML = "<p>No se encontraron datos en el sistema.</p>";
+        }
+      } else {
+        // Si no hay sesión activa
+        dashboard.innerHTML = "<p>Debes iniciar sesión para acceder al dashboard.</p>";
+        setTimeout(() => {
+          window.location.href = "login.html";
+        }, 2000);
+      }
+    });
+
+    // Cerrar sesión
+    window.logoutKayrox = function() {
+      signOut(auth).then(() => {
+        window.location.href = "login.html";
+      });
     }
   </script>
 </head>
@@ -50,32 +67,22 @@
   <header>
     <h1>Kayrox Software</h1>
     <nav>
-      <a href="inicio.html">Inicio</a>
-      <a href="convocatoriadereclutamiento.html">Convocatoria</a>
-      <a href="dashboard.html">Dashboard</a>
-      <a href="contacto.html">Contacto</a>
+      <a href="#">Inicio</a>
+      <a href="#">Convocatoria</a>
+      <a href="#">Dashboard</a>
+      <a href="#" onclick="logoutKayrox()">Cerrar sesión</a>
     </nav>
   </header>
 
   <div class="hero">
-    <h2>Acceso al Dashboard</h2>
-    <p>Inicia sesión para gestionar tu participación</p>
+    <h2>Dashboard del Contribuyente</h2>
+    <p>Consulta tu estado y beneficios</p>
   </div>
 
-  <section id="login">
+  <section id="dashboard">
     <div class="container">
-      <div class="card">
-        <h3>Iniciar sesión</h3>
-        <form onsubmit="loginKayrox(event)">
-          <label for="email">Correo electrónico</label><br>
-          <input type="email" id="email" name="email" required><br><br>
-
-          <label for="password">Contraseña</label><br>
-          <input type="password" id="password" name="password" required><br><br>
-
-          <button type="submit" class="btn">Entrar</button>
-        </form>
-        <p id="loginMessage" class="estado"></p>
+      <div class="card" id="userInfo">
+        <h3>Cargando datos...</h3>
       </div>
     </div>
   </section>
