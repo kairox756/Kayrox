@@ -1,14 +1,9 @@
 {
-  "latest": "1.0.2.0.ATEMIKEST",
-  "download_url": "https://kayrox.qzz.io/updates/MikShell1.0.2.0.ATEMIKEST.zip",
-  "release_date": "2026-05-14",
+  "latest": "1.0.1.0.ATEMIKEST",
+  "download_url": "https://kayrox.qzz.io/updates/MikShell1.0.1.0.ATEMIKEST.zip",
+  "release_date": "2026-05-07",
   "changelog": [
-    "Parche de seguridad aplicado",
-    "Bloqueo de cambio de servidor en modo bloqueado",
-    "Validación de HTTPS en OTA",
-    "Confirmación interactiva antes de actualizar",
-    "Rotación automática de logs",
-    "Verificación SHA256 de paquetes OTA"
+    "Lanzamiento Inicial"
   ],
   "mandatory": false,
   "hash": "SHA256SUM_DEL_ARCHIVO_ZIP"
