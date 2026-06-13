@@ -3,6 +3,7 @@ body {
   font-family: 'Segoe UI', Arial, sans-serif;
   background: linear-gradient(to bottom, #f9f9f9, #e6e6e6);
   color: #333;
+  animation: pageLoad 1s ease; /* Animación de carga */
 }
 
 header {
@@ -40,7 +41,7 @@ nav a:hover {
   color: white;
   padding: 60px 40px;
   text-align: center;
-  animation: fadeIn 1.2s ease;
+  animation: fadeIn 1s ease;
 }
 
 .hero h2 {
@@ -82,7 +83,7 @@ nav a:hover {
   width: 80px;
   height: 80px;
   object-fit: contain;
-  animation: spinLogo 6s linear infinite;
+  animation: fadeIn 1s ease; /* Solo aparece suavemente, sin girar */
 }
 
 .estado {
@@ -135,7 +136,12 @@ footer {
   border-bottom: 3px solid #ffb900;
 }
 
-/* Animaciones estilo 2013 */
+/* Animaciones */
+@keyframes pageLoad {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 @keyframes slideDown {
   from { transform: translateY(-100%); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
@@ -149,11 +155,6 @@ footer {
 @keyframes popUp {
   from { transform: scale(0.9); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
-}
-
-@keyframes spinLogo {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
 }
 
 @keyframes pulse {
