@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Consulta de Registro Web
+    </title>
+
+    <link rel="stylesheet"href="css/styles.css">
+
+</head>
+
+<body>
+
+<header>
+
+    <h1>
+        Consulta de Registro Web
+    </h1>
+
+</header>
+
+<main class="container">
+
+    <section class="card">
+
+        <h2>
+            Validar CLURW
+        </h2>
+
+        <div class="form-grid">
+
+            <div>
+
+                <label>
+                    CLURW
+                </label>
+
+                <input
+                    type="text"
+                    id="buscarCLURW"
+                    placeholder="Ej. KYR261022001">
+
+            </div>
+
+        </div>
+
+        <br>
+
+        <button
+            class="btn btn-primary"
+            onclick="consultarRegistro()">
+
+            Consultar
+
+        </button>
+
+    </section>
+
+    <section
+        class="card"
+        id="resultadoCard"
+        style="display:none;">
+
+        <h2>
+            Información del Registro
+        </h2>
+
+        <table>
+
+            <tbody>
+
+                <tr>
+                    <th>Constancia</th>
+                    <td id="r_constancia"></td>
+                </tr>
+
+                <tr>
+                    <th>CLURW</th>
+                    <td id="r_clurw"></td>
+                </tr>
+
+                <tr>
+                    <th>Página</th>
+                    <td id="r_pagina"></td>
+                </tr>
+
+                <tr>
+                    <th>Propietario</th>
+                    <td id="r_propietario"></td>
+                </tr>
+
+                <tr>
+                    <th>Empresa</th>
+                    <td id="r_empresa"></td>
+                </tr>
+
+                <tr>
+                    <th>Fecha Registro</th>
+                    <td id="r_fecha"></td>
+                </tr>
+
+                <tr>
+                    <th>Estatus Pago</th>
+                    <td id="r_pago"></td>
+                </tr>
+
+                <tr>
+                    <th>Estatus Sistema</th>
+                    <td id="r_estatus"></td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </section>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/consulta.js"></script>
+
+</body>
+
+</html>
