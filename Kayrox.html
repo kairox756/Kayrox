@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kayrox | Ingeniería de Software, Bajo Nivel &amp; Multiplataforma</title>
+    <style>
+        :root {
+            /* Paleta estricta Visual Studio 2013 Dark */
+            --bg-main: #1E1E1E;
+            --bg-surface: #252526;
+            --bg-elevated: #2D2D30;
+            --bg-banner: #181818;
+            --border-color: #3E3E42;
+            --vs-blue: #007ACC;
+            --vs-blue-hover: #1C97EA;
+            --vs-purple: #68217A;
+            --vs-purple-light: #9B4F96;
+            --text-primary: #F1F1F1;
+            --text-secondary: #CCCCCC;
+            --text-muted: #999999;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+
+        /* 1. Barra de Navegación Superior estilo Microsoft */
+        .ms-navbar {
+            background-color: var(--bg-elevated);
+            border-bottom: 1px solid var(--border-color);
+            height: 54px;
+            padding: 0 5%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--text-primary);
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .nav-logo-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            background-color: var(--vs-blue);
+            color: #FFFFFF;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .nav-divider {
+            width: 1px;
+            height: 24px;
+            background-color: var(--border-color);
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            padding: 15px 0;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-primary);
+            border-bottom-color: var(--vs-blue);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .nav-cta {
+            background-color: var(--vs-blue);
+            color: #FFFFFF;
+            text-decoration: none;
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .nav-cta:hover {
+            background-color: var(--vs-blue-hover);
+        }
+
+        /* 2. Hero Banner Asimétrico estilo Microsoft */
+        .hero-section {
+            background: linear-gradient(135deg, #1E1E1E 0%, #252526 60%, #192836 100%);
+            border-bottom: 1px solid var(--border-color);
+            padding: 5rem 5%;
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 3rem;
+            align-items: center;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background-color: var(--vs-purple);
+            color: #FFFFFF;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 3px 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 1rem;
+        }
+
+        .hero-title {
+            font-size: 2.8rem;
+            font-weight: 600;
+            line-height: 1.15;
+            margin-bottom: 1.2rem;
+            letter-spacing: -0.5px;
+        }
+
+        .hero-desc {
+            font-size: 1.15rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            max-width: 580px;
+            font-weight: 300;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn-ms-primary {
+            background-color: var(--vs-blue);
+            color: #FFFFFF;
+            padding: 10px 22px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+
+        .btn-ms-primary:hover {
+            background-color: var(--vs-blue-hover);
+        }
+
+        .btn-ms-outline {
+            background-color: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--text-primary);
+            padding: 10px 22px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        .btn-ms-outline:hover {
+            background-color: rgba(255, 255, 255, 0.08);
+        }
+
+        /* Panel visual derecho del Hero con Logo Animado */
+        .hero-visual {
+            background-color: var(--bg-banner);
+            border: 1px solid var(--border-color);
+            padding: 3.5rem 2rem 2.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            position: relative;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        .hero-visual::before {
+            content: "KAYROX ARCHITECTURE // SYSTEM OVERVIEW";
+            position: absolute;
+            top: 10px;
+            left: 14px;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+        }
+
+        .logo-anim-box {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo-svg {
+            width: 72px;
+            height: 72px;
+        }
+
+        .k-stem { fill: #F1F1F1; opacity: 0; animation: slideLeft 0.6s ease forwards; }
+        .k-top { fill: var(--vs-purple); opacity: 0; animation: slideTop 0.6s ease 0.2s forwards; }
+        .k-bot { fill: var(--vs-blue); opacity: 0; animation: slideBot 0.6s ease 0.3s forwards; }
+        .k-sym {
+            stroke: var(--vs-blue);
+            stroke-width: 4;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-dasharray: 60;
+            stroke-dashoffset: 60;
+            animation: draw 0.8s ease 0.5s forwards;
+        }
+
+        .logo-word {
+            font-size: 3.4rem;
+            font-weight: 600;
+            letter-spacing: -1px;
+            opacity: 0;
+            animation: fadeIn 0.8s ease 0.4s forwards;
+        }
+
+        .hero-visual-caption {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            letter-spacing: 0.4px;
+        }
+
+        /* 3. Barra de Accesos Rápidos (Quick Links Bar estilo Microsoft) */
+        .quick-links-bar {
+            background-color: var(--bg-surface);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.8rem 5%;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+        }
+
+        .q-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            text-decoration: none;
+            color: var(--text-primary);
+            padding: 8px;
+            transition: background 0.2s;
+        }
+
+        .q-item:hover {
+            background-color: var(--bg-elevated);
+        }
+
+        .q-icon {
+            width: 38px;
+            height: 38px;
+            flex-shrink: 0;
+            background-color: var(--bg-main);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--vs-blue);
+            font-family: "Consolas", monospace;
+            font-weight: bold;
+            font-size: 0.95rem;
+        }
+
+        .q-text strong {
+            display: block;
+            font-size: 0.95rem;
+            color: var(--vs-blue-hover);
+        }
+
+        .q-text span {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* 4. Sección Editorial con Pestañas Interactivas (Estilo Documentación MS) */
+        .content-section {
+            padding: 4.5rem 5%;
+        }
+
+        .section-header {
+            margin-bottom: 2.5rem;
+        }
+
+        .section-header h2 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-header p {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+        }
+
+        .ms-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .ms-tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 12px 4px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .ms-tab-btn:hover {
+            color: var(--text-secondary);
+        }
+
+        .ms-tab-btn.active {
+            color: var(--text-primary);
+            border-bottom-color: var(--vs-blue);
+        }
+
+        .tab-panel {
+            display: none;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            padding: 2.5rem;
+        }
+
+        .tab-panel.active {
+            display: grid;
+        }
+
+        .tab-info h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .tab-info p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            font-size: 0.98rem;
+        }
+
+        .ms-list {
+            list-style: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .ms-list li {
+            margin-bottom: 0.6rem;
+            padding-left: 20px;
+            position: relative;
+            color: var(--text-secondary);
+            font-size: 0.92rem;
+        }
+
+        .ms-list li::before {
+            content: "▸";
+            color: var(--vs-blue);
+            position: absolute;
+            left: 0;
+        }
+
+        .code-preview {
+            background-color: #181818;
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            font-family: "Consolas", monospace;
+            font-size: 0.88rem;
+            line-height: 1.55;
+            color: #D4D4D4;
+            overflow-x: auto;
+        }
+
+        .code-preview code {
+            font-family: inherit;
+        }
+
+        .c-comment { color: #57A64A; }
+        .c-kw { color: #569CD6; }
+        .c-type { color: #4EC9B0; }
+        .c-str { color: #D69D85; }
+        .c-num { color: #B5CEA8; }
+
+        /* 5. Grid de Tarjetas Corporativas (Estilo Microsoft Cards) */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.8rem;
+        }
+
+        .ms-card {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .ms-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--vs-blue);
+        }
+
+        .ms-card-top {
+            height: 6px;
+            background-color: var(--vs-blue);
+        }
+
+        .ms-card-top.purple {
+            background-color: var(--vs-purple);
+        }
+
+        .ms-card-body {
+            padding: 1.8rem;
+        }
+
+        .ms-card-eyebrow {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .ms-card-body h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .ms-card-body p {
+            font-size: 0.92rem;
+            color: var(--text-secondary);
+        }
+
+        .ms-card-footer {
+            padding: 1rem 1.8rem 1.8rem;
+        }
+
+        .ms-link {
+            color: var(--vs-blue-hover);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .ms-link:hover {
+            text-decoration: underline;
+        }
+
+        /* 6. Footer Corporativo Multi-columna estilo Microsoft */
+        .ms-footer {
+            background-color: var(--bg-elevated);
+            border-top: 1px solid var(--border-color);
+            padding: 3.5rem 5% 2rem;
+            margin-top: 3rem;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-col h4 {
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .footer-col ul {
+            list-style: none;
+        }
+
+        .footer-col li {
+            margin-bottom: 0.6rem;
+        }
+
+        .footer-col a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+        }
+
+        .footer-col a:hover {
+            color: var(--text-primary);
+            text-decoration: underline;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        @keyframes slideLeft { from { opacity: 0; transform: translateX(-15px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes slideTop { from { opacity: 0; transform: translate(10px, -10px); } to { opacity: 1; transform: translate(0, 0); } }
+        @keyframes slideBot { from { opacity: 0; transform: translate(10px, 10px); } to { opacity: 1; transform: translate(0, 0); } }
+        @keyframes draw { to { stroke-dashoffset: 0; } }
+        @keyframes fadeIn { to { opacity: 1; } }
+
+        @media (max-width: 900px) {
+            .hero-section, .tab-panel { grid-template-columns: 1fr; }
+            .quick-links-bar, .cards-grid, .footer-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (max-width: 600px) {
+            .quick-links-bar, .cards-grid, .footer-grid { grid-template-columns: 1fr; }
+            .nav-links, .nav-divider { display: none; }
+            .hero-title { font-size: 2.2rem; }
+            .logo-word { font-size: 2.6rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 1. Barra de Navegación Superior -->
+    <header class="ms-navbar">
+        <div class="nav-left">
+            <a href="#" class="nav-logo">
+                <span class="nav-logo-badge">K</span>
+                <span>Kayrox</span>
+            </a>
+            <div class="nav-divider"></div>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="#capacidades" onclick="selectTabById('tab-lowlevel')">Arquitectura</a></li>
+                    <li><a href="#capacidades" onclick="selectTabById('tab-desktop')">Windows &amp; Linux</a></li>
+                    <li><a href="#capacidades" onclick="selectTabById('tab-web')">Desarrollo Web</a></li>
+                    <li><a href="#pilares">Documentación</a></li>
+                </ul>
+            </nav>
+        </div>
+        <div class="nav-right">
+            <a href="#contacto" class="nav-cta">Iniciar Proyecto</a>
+        </div>
+    </header>
+
+    <main>
+        <!-- 2. Hero Banner Asimétrico -->
+        <section class="hero-section">
+            <div>
+                <span class="hero-badge">Ingeniería de Software &amp; Sistemas</span>
+                <h1 class="hero-title">Soluciones nativas de alto rendimiento para entornos modernos.</h1>
+                <p class="hero-desc">
+                    Desarrollo especializado desde programación de bajo nivel y aplicaciones de escritorio para Windows y Linux, hasta arquitecturas web escalables.
+                </p>
+                <div class="hero-actions">
+                    <a href="#capacidades" class="btn-ms-primary">Explorar Stack Técnico →</a>
+                    <a href="#pilares" class="btn-ms-outline">Ver Especificaciones</a>
+                </div>
+            </div>
+
+            <div class="hero-visual">
+                <div class="logo-anim-box">
+                    <svg class="logo-svg" viewBox="0 0 100 100" aria-hidden="true">
+                        <rect class="k-stem" x="18" y="18" width="14" height="64" rx="2"></rect>
+                        <polygon class="k-top" points="32,48 68,18 82,18 44,50"></polygon>
+                        <polygon class="k-bot" points="36,48 82,82 66,82 32,54"></polygon>
+                        <polyline class="k-sym" points="62,38 74,50 62,62"></polyline>
+                    </svg>
+                    <span class="logo-word">Kayrox</span>
+                </div>
+                <span class="hero-visual-caption">Sistemas • Aplicaciones Nativas • Ecosistema Web</span>
+            </div>
+        </section>
+
+        <!-- 3. Barra de Accesos Rápidos -->
+        <section class="quick-links-bar" aria-label="Accesos rápidos">
+            <a href="#capacidades" class="q-item" onclick="selectTabById('tab-lowlevel')">
+                <div class="q-icon">0x</div>
+                <div class="q-text">
+                    <strong>Bajo Nivel</strong>
+                    <span>C, C++, Rust &amp; Gestión de Memoria</span>
+                </div>
+            </a>
+
+            <a href="#capacidades" class="q-item" onclick="selectTabById('tab-desktop')">
+                <div class="q-icon">WIN</div>
+                <div class="q-text">
+                    <strong>Ecosistema Windows</strong>
+                    <span>Win32 API, .NET &amp; Servicios</span>
+                </div>
+            </a>
+
+            <a href="#capacidades" class="q-item" onclick="selectTabById('tab-desktop')">
+                <div class="q-icon">$_</div>
+                <div class="q-text">
+                    <strong>Entornos Linux</strong>
+                    <span>POSIX, Daemons &amp; Herramientas CLI</span>
+                </div>
+            </a>
+
+            <a href="#capacidades" class="q-item" onclick="selectTabById('tab-web')">
+                <div class="q-icon">&lt;/&gt;</div>
+                <div class="q-text">
+                    <strong>Plataforma Web</strong>
+                    <span>TypeScript, WebAssembly &amp; APIs</span>
+                </div>
+            </a>
+        </section>
+
+        <!-- 4. Sección Editorial con Pestañas Interactivas -->
+        <section id="capacidades" class="content-section">
+            <div class="section-header">
+                <h2>Capacidades Técnicas</h2>
+                <p>Selecciona un área de especialización para inspeccionar la arquitectura y tecnologías implementadas.</p>
+            </div>
+
+            <div class="ms-tabs" role="tablist">
+                <button type="button" class="ms-tab-btn active" data-tab="tab-lowlevel" onclick="openTab(event, 'tab-lowlevel')">Bajo Nivel &amp; Sistemas</button>
+                <button type="button" class="ms-tab-btn" data-tab="tab-desktop" onclick="openTab(event, 'tab-desktop')">Apps Windows &amp; Linux</button>
+                <button type="button" class="ms-tab-btn" data-tab="tab-web" onclick="openTab(event, 'tab-web')">Desarrollo Web</button>
+            </div>
+
+            <!-- Panel 1: Bajo Nivel -->
+            <div id="tab-lowlevel" class="tab-panel active">
+                <div class="tab-info">
+                    <h3>Control directo sobre el hardware y la memoria</h3>
+                    <p>Diseño de software crítico donde cada ciclo de CPU y byte de memoria importa. Construcción de librerías nativas, motores de procesamiento y herramientas de sistema.</p>
+                    <ul class="ms-list">
+                        <li>Gestión manual y segura de memoria (C/C++ moderno y Rust).</li>
+                        <li>Interoperabilidad entre módulos nativos y lenguajes de alto nivel.</li>
+                        <li>Optimización de concurrencia, hilos y llamadas al sistema (Syscalls).</li>
+                    </ul>
+                    <a href="#pilares" class="ms-link">Consultar estándares de rendimiento →</a>
+                </div>
+                <pre class="code-preview"><code><span class="c-kw">#include</span> <span class="c-str">&lt;stdint.h&gt;</span>
+
+<span class="c-comment">// Asignación alineada de memoria para procesamiento crítico</span>
+<span class="c-kw">typedef struct</span> {
+    <span class="c-type">uint64_t</span> buffer_addr;
+    <span class="c-type">size_t</span>   capacity;
+    <span class="c-type">uint8_t</span>  status_flags;
+} <span class="c-type">KayroxCoreBlock</span>;
+
+<span class="c-kw">void</span> init_engine(<span class="c-type">KayroxCoreBlock</span>* block) {
+    block-&gt;status_flags |= <span class="c-num">0x01</span>;
+}</code></pre>
+            </div>
+
+            <!-- Panel 2: Desktop -->
+            <div id="tab-desktop" class="tab-panel">
+                <div class="tab-info">
+                    <h3>Software nativo multiplataforma sin compromisos</h3>
+                    <p>Desarrollo de aplicaciones de escritorio integradas profundamente con el sistema operativo anfitrión, respetando las convenciones de Windows y distribuciones Linux.</p>
+                    <ul class="ms-list">
+                        <li>Interfaces nativas y servicios en segundo plano para Windows (Win32 / .NET).</li>
+                        <li>Utilidades de línea de comandos (CLI), demonios y aplicaciones GTK/Qt en Linux.</li>
+                        <li>Compilación cruzada y empaquetado optimizado para ambas plataformas.</li>
+                    </ul>
+                    <a href="#pilares" class="ms-link">Ver arquitectura multiplataforma →</a>
+                </div>
+                <pre class="code-preview"><code><span class="c-comment">// Detección de entorno en tiempo de compilación</span>
+<span class="c-kw">#if defined</span>(_WIN32)
+    <span class="c-kw">#include</span> <span class="c-str">&lt;windows.h&gt;</span>
+    <span class="c-kw">const char</span>* TARGET_OS = <span class="c-str">"Windows NT Kernel"</span>;
+<span class="c-kw">#elif defined</span>(linux)
+    <span class="c-kw">#include</span> <span class="c-str">&lt;unistd.h&gt;</span>
+    <span class="c-kw">const char</span>* TARGET_OS = <span class="c-str">"Linux POSIX System"</span>;
+<span class="c-kw">#endif</span></code></pre>
+            </div>
+
+            <!-- Panel 3: Web -->
+            <div id="tab-web" class="tab-panel">
+                <div class="tab-info">
+                    <h3>Aplicaciones Web con potencia de escritorio</h3>
+                    <p>Construcción de plataformas web rápidas, accesibles y seguras, combinando estándares modernos con lógica compilada mediante WebAssembly.</p>
+                    <ul class="ms-list">
+                        <li>Arquitecturas Frontend limpias con TypeScript, HTML5 y CSS3 modular.</li>
+                        <li>Servicios Backend de baja latencia y APIs RESTful / WebSockets.</li>
+                        <li>Ejecución de código C/Rust en el navegador mediante WebAssembly (WASM).</li>
+                    </ul>
+                    <a href="#pilares" class="ms-link">Explorar soluciones web →</a>
+                </div>
+                <pre class="code-preview"><code><span class="c-comment">// Carga de módulo nativo compilado en WebAssembly</span>
+<span class="c-kw">async function</span> loadKayroxWasm() {
+    <span class="c-kw">const</span> response = <span class="c-kw">await</span> fetch(<span class="c-str">'kayrox_core.wasm'</span>);
+    <span class="c-kw">const</span> { instance } = <span class="c-kw">await</span> WebAssembly.instantiateStreaming(response);
+    <span class="c-kw">return</span> instance.exports;
+}</code></pre>
+            </div>
+        </section>
+
+        <!-- 5. Grid de Tarjetas Corporativas -->
+        <section id="pilares" class="content-section" style="padding-top: 0;">
+            <div class="section-header">
+                <h2>Pilares de Desarrollo</h2>
+                <p>Enfoque metodológico aplicado a cada proyecto de software.</p>
+            </div>
+
+            <div class="cards-grid">
+                <article class="ms-card">
+                    <div>
+                        <div class="ms-card-top"></div>
+                        <div class="ms-card-body">
+                            <div class="ms-card-eyebrow">Rendimiento</div>
+                            <h3>Eficiencia sin Bloatware</h3>
+                            <p>Software diseñado para iniciar al instante y consumir el mínimo de recursos de RAM y procesador, priorizando algoritmos limpios.</p>
+                        </div>
+                    </div>
+                    <div class="ms-card-footer">
+                        <a href="#contacto" class="ms-link">Solicitar auditoría técnica →</a>
+                    </div>
+                </article>
+
+                <article class="ms-card">
+                    <div>
+                        <div class="ms-card-top purple"></div>
+                        <div class="ms-card-body">
+                            <div class="ms-card-eyebrow">Portabilidad</div>
+                            <h3>Código Base Unificado</h3>
+                            <p>Arquitecturas desacopladas que permiten compartir el núcleo lógico entre Windows, Linux y entornos Web sin duplicar esfuerzos.</p>
+                        </div>
+                    </div>
+                    <div class="ms-card-footer">
+                        <a href="#capacidades" class="ms-link">Conocer flujo de trabajo →</a>
+                    </div>
+                </article>
+
+                <article class="ms-card">
+                    <div>
+                        <div class="ms-card-top"></div>
+                        <div class="ms-card-body">
+                            <div class="ms-card-eyebrow">Estabilidad</div>
+                            <h3>Ingeniería Determinista</h3>
+                            <p>Manejo estricto de errores, pruebas automatizadas y código mantenible pensado para operar de forma continua en producción.</p>
+                        </div>
+                    </div>
+                    <div class="ms-card-footer">
+                        <a href="https://github.com/kairox756/Kayrox" target="_blank" rel="noopener noreferrer" class="ms-link">Ver proyectos activos →</a>
+                    </div>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <!-- 6. Footer Corporativo Multi-columna -->
+    <footer id="contacto" class="ms-footer">
+        <div class="footer-grid">
+            <div class="footer-col">
+                <h4>Especialidades</h4>
+                <ul>
+                    <li><a href="#capacidades" onclick="selectTabById('tab-lowlevel')">Programación de Bajo Nivel</a></li>
+                    <li><a href="#capacidades" onclick="selectTabById('tab-desktop')">Aplicaciones Windows</a></li>
+                    <li><a href="#capacidades" onclick="selectTabById('tab-desktop')">Software para Linux</a></li>
+                    <li><a href="#capacidades" onclick="selectTabById('tab-web')">Desarrollo Web &amp; WASM</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4>Tecnologías Core</h4>
+                <ul>
+                    <li><a href="#capacidades" onclick="selectTabById('tab-lowlevel')">C / C++ &amp; Rust</a></li>
+                    <li><a href="#capacidades" onclick="selectTabById('tab-desktop')">.NET &amp; Win32 API</a></li>
+                    <li><a href="#capacidades" onclick="selectTabById('tab-desktop')">Linux Kernel &amp; POSIX</a></li>
+                    <li><a href="#capacidades" onclick="selectTabById('tab-web')">TypeScript &amp; WebAssembly</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4>Recursos</h4>
+                <ul>
+                    <li><a href="#pilares">Documentación Técnica</a></li>
+                    <li><a href="https://github.com/kairox756/Kayrox" target="_blank" rel="noopener noreferrer">Repositorios Open Source</a></li>
+                    <li><a href="#capacidades">Notas de Versión</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4>Contacto Directo</h4>
+                <ul>
+                    <li><a href="mailto:contacto@kayrox.dev">contacto@kayrox.dev</a></li>
+                    <li><a href="https://github.com/kairox756/Kayrox" target="_blank" rel="noopener noreferrer">GitHub (@kayrox)</a></li>
+                    <li><a href="#contacto">Consultoría de Software</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <span>Español (México) • Tema Visual Studio 2013 Dark</span>
+            <span>© 2026 Kayrox Development. Todos los derechos reservados.</span>
+        </div>
+    </footer>
+
+    <script>
+        function openTab(evt, tabId) {
+            const panels = document.querySelectorAll('.tab-panel');
+            const buttons = document.querySelectorAll('.ms-tab-btn');
+            panels.forEach(p => p.classList.remove('active'));
+            buttons.forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            evt.currentTarget.classList.add('active');
+        }
+
+        function selectTabById(tabId) {
+            const panels = document.querySelectorAll('.tab-panel');
+            const buttons = document.querySelectorAll('.ms-tab-btn');
+            panels.forEach(p => p.classList.remove('active'));
+            buttons.forEach(b => {
+                b.classList.toggle('active', b.dataset.tab === tabId);
+            });
+            const targetPanel = document.getElementById(tabId);
+            if (targetPanel) targetPanel.classList.add('active');
+        }
+    </script>
+</body>
+</html>
