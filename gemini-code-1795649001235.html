@@ -1,0 +1,4163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIADFI • Banca Digital & Control Financiero</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+  <script>
+    // Verificación temprana de incompatibilidad con Internet Explorer y APIs modernas requeridas
+    (function () {
+      var ua = window.navigator.userAgent || '';
+      var isIE = /MSIE|Trident\//i.test(ua) || !!document.documentMode;
+      var hasModernSupport = (
+        typeof window.Promise !== 'undefined' &&
+        typeof window.localStorage !== 'undefined' &&
+        typeof window.JSON !== 'undefined' &&
+        typeof Array.prototype.forEach === 'function' &&
+        typeof Object.assign === 'function'
+      );
+
+      if (isIE || !hasModernSupport) {
+        window.__SIADFI_BOOT_FATAL__ = isIE
+          ? 'Navegador Internet Explorer no soportado. Utiliza un navegador moderno (Chrome, Edge, Firefox o Safari).'
+          : 'El entorno del navegador no cumple con los requisitos técnicos mínimos para iniciar la aplicación.';
+      }
+
+      window.addEventListener('error', function (ev) {
+        var splash = document.getElementById('splashScreen');
+        var mainApp = document.getElementById('mainAppWrapper');
+        if (splash && (!mainApp || mainApp.style.display === 'none')) {
+          showStartupError(ev && ev.message ? ev.message : 'Error crítico durante la inicialización.');
+        }
+      });
+
+      window.addEventListener('unhandledrejection', function (ev) {
+        var splash = document.getElementById('splashScreen');
+        var mainApp = document.getElementById('mainAppWrapper');
+        if (splash && (!mainApp || mainApp.style.display === 'none')) {
+          var reason = ev && ev.reason ? (ev.reason.message || String(ev.reason)) : 'Fallo asíncrono en el arranque.';
+          showStartupError(reason);
+        }
+      });
+    })();
+
+    function showStartupError(detail) {
+      var splash = document.getElementById('splashScreen');
+      var onboarding = document.getElementById('onboardingScreen');
+      var mainApp = document.getElementById('mainAppWrapper');
+      if (onboarding) onboarding.style.display = 'none';
+      if (mainApp) mainApp.style.display = 'none';
+      if (!splash) return;
+
+      splash.style.display = 'flex';
+      var spinner = document.getElementById('splashSpinnerMode');
+      var firstSetup = document.getElementById('splashFirstSetupMode');
+      var eraseMode = document.getElementById('splashEraseMode');
+      var errorMode = document.getElementById('splashErrorMode');
+      var errorDetail = document.getElementById('splashErrorDetail');
+
+      if (spinner) spinner.style.display = 'none';
+      if (firstSetup) firstSetup.style.display = 'none';
+      if (eraseMode) eraseMode.style.display = 'none';
+      if (errorMode) errorMode.style.display = 'block';
+      if (errorDetail) errorDetail.textContent = detail || 'No se pudo cargar el núcleo de SIADFI.';
+    }
+  </script>
+  <style id="siadfiBaseStyle">
+    :root {
+      --bg-app: #f4f7fb;
+      --surface: #ffffff;
+      --surface-soft: #f8fafd;
+      --bank-navy: #0a192f;
+      --bank-indigo: #1e3a8a;
+      --bank-blue: #2563eb;
+      --bank-blue-hover: #1d4ed8;
+      --bank-cyan: #0ea5e9;
+      --bank-tint: #eff6ff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border-light: #e2e8f0;
+      --emerald: #10b981;
+      --emerald-bg: #ecfdf5;
+      --amber: #f59e0b;
+      --amber-bg: #fffbeb;
+      --rose: #ef4444;
+      --rose-bg: #fef2f2;
+      --shadow-sm: 0 2px 10px rgba(15, 23, 42, 0.04);
+      --shadow-md: 0 10px 25px -5px rgba(15, 23, 42, 0.07), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+      --shadow-lg: 0 20px 35px -10px rgba(10, 25, 47, 0.18);
+      --ease-spring: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    /* Temas de Apariencia */
+    body.theme-dark {
+      --bg-app: #090e1a;
+      --surface: #111827;
+      --surface-soft: #1e293b;
+      --bank-tint: #172554;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border-light: #334155;
+      --emerald-bg: rgba(16, 185, 129, 0.15);
+      --amber-bg: rgba(245, 158, 11, 0.15);
+      --rose-bg: rgba(239, 68, 68, 0.16);
+      --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.35);
+      --shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.45);
+      --shadow-lg: 0 20px 35px -10px rgba(0, 0, 0, 0.6);
+    }
+
+    body.accent-emerald {
+      --bank-blue: #059669;
+      --bank-blue-hover: #047857;
+      --bank-tint: #ecfdf5;
+    }
+    body.theme-dark.accent-emerald {
+      --bank-tint: rgba(16, 185, 129, 0.18);
+    }
+
+    body.accent-indigo {
+      --bank-blue: #4f46e5;
+      --bank-blue-hover: #4338ca;
+      --bank-tint: #eef2ff;
+    }
+    body.theme-dark.accent-indigo {
+      --bank-tint: rgba(79, 70, 229, 0.22);
+    }
+
+    body.accent-slate {
+      --bank-blue: #334155;
+      --bank-blue-hover: #1e293b;
+      --bank-tint: #f1f5f9;
+    }
+    body.theme-dark.accent-slate {
+      --bank-blue: #64748b;
+      --bank-blue-hover: #475569;
+      --bank-tint: rgba(100, 116, 139, 0.22);
+    }
+
+    body.density-compact .panel { padding: 16px 18px; }
+    body.density-compact td, body.density-compact th { padding: 9px 11px; }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    body {
+      background: var(--bg-app);
+      color: var(--text-main);
+      margin: 0;
+      padding-bottom: 70px;
+      -webkit-font-smoothing: antialiased;
+      transition: background 0.25s ease, color 0.25s ease;
+    }
+
+    /* Animaciones Globales */
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(18px) scale(0.985); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+      50% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+    }
+
+    @keyframes floatSlow {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-4px); }
+    }
+
+    @keyframes googleRotate {
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes googleDash {
+      0% { stroke-dasharray: 1, 150; stroke-dashoffset: 0; }
+      50% { stroke-dasharray: 90, 150; stroke-dashoffset: -35; }
+      100% { stroke-dasharray: 90, 150; stroke-dashoffset: -124; }
+    }
+
+    .google-spinner {
+      width: 54px;
+      height: 54px;
+      animation: googleRotate 2s linear infinite;
+    }
+
+    .google-spinner circle {
+      stroke: #38bdf8;
+      stroke-linecap: round;
+      animation: googleDash 1.5s ease-in-out infinite;
+    }
+
+    .animate-in {
+      animation: fadeSlideUp 0.45s var(--ease-spring) both;
+    }
+
+    /* Pantallas de Arranque, Asistente Inicial y Borrado */
+    .fullscreen-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .splash-screen {
+      background: linear-gradient(135deg, #0a192f 0%, #11294d 55%, #1e3a8a 100%);
+      color: #fff;
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .splash-logo-box {
+      width: 96px;
+      height: 96px;
+      border-radius: 28px;
+      background: linear-gradient(135deg, #38bdf8 0%, #2563eb 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 18px 40px rgba(37, 99, 235, 0.45);
+      margin: 0 auto 24px;
+      animation: floatSlow 3.5s ease-in-out infinite;
+    }
+
+    .splash-app-name {
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -0.8px;
+      margin: 0 0 8px;
+    }
+
+    .splash-app-tagline {
+      font-size: 0.98rem;
+      color: #cbd5e1;
+      margin-bottom: 36px;
+    }
+
+    .boot-error-box {
+      background: rgba(239, 68, 68, 0.16);
+      border: 1.5px solid rgba(248, 113, 113, 0.55);
+      border-radius: 20px;
+      padding: 24px 28px;
+      max-width: 480px;
+      margin: 0 auto;
+      backdrop-filter: blur(8px);
+    }
+
+    .onboarding-screen {
+      background: linear-gradient(145deg, #0a192f 0%, #172554 100%);
+      align-items: flex-start;
+      padding-top: 32px;
+      padding-bottom: 32px;
+    }
+
+    .onboarding-card {
+      background: var(--surface);
+      color: var(--text-main);
+      border-radius: 26px;
+      width: 100%;
+      max-width: 760px;
+      margin: auto;
+      padding: 34px 36px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45);
+      animation: fadeSlideUp 0.45s var(--ease-spring);
+    }
+
+    .step-indicator {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    .step-dot {
+      height: 6px;
+      flex: 1;
+      border-radius: 999px;
+      background: var(--border-light);
+      transition: background 0.3s;
+    }
+
+    .step-dot.active { background: var(--bank-blue); }
+    .step-dot.done { background: var(--emerald); }
+
+    .terms-box {
+      background: var(--surface-soft);
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 18px 20px;
+      max-height: 270px;
+      overflow-y: auto;
+      font-size: 0.86rem;
+      line-height: 1.6;
+      color: var(--text-main);
+      margin-bottom: 18px;
+    }
+
+    .checkbox-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bank-tint);
+      border: 1.5px solid #bfdbfe;
+      padding: 14px 16px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--text-main);
+      margin-bottom: 20px;
+    }
+
+    .checkbox-card input {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--bank-blue);
+      cursor: pointer;
+    }
+
+    /* Barra Superior Bancaria */
+    .bank-topbar {
+      background: linear-gradient(135deg, var(--bank-navy) 0%, #11294d 55%, var(--bank-indigo) 100%);
+      color: #fff;
+      padding: 20px 24px 92px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .bank-topbar::before {
+      content: "";
+      position: absolute;
+      top: -80px;
+      right: -60px;
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.22) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .bank-topbar::after {
+      content: "";
+      position: absolute;
+      bottom: -90px;
+      left: 10%;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(37, 99, 235, 0.25) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .topbar-inner {
+      max-width: 1160px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-emblem {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #38bdf8 0%, #2563eb 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
+      animation: floatSlow 4s ease-in-out infinite;
+    }
+
+    .brand-title {
+      margin: 0;
+      font-size: 1.32rem;
+      font-weight: 800;
+      letter-spacing: -0.4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-badge {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      background: rgba(255, 255, 255, 0.14);
+      padding: 3px 8px;
+      border-radius: 6px;
+      color: #bae6fd;
+    }
+
+    .brand-subtitle {
+      font-size: 0.8rem;
+      color: #cbd5e1;
+      margin-top: 2px;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .user-chip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      padding: 6px 14px 6px 8px;
+      border-radius: 999px;
+      backdrop-filter: blur(8px);
+    }
+
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #38bdf8, #3b82f6);
+      color: #fff;
+      font-weight: 800;
+      font-size: 0.82rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .status-pill {
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 0.85rem;
+      letter-spacing: 0.8px;
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+      border: 1.5px solid rgba(255, 255, 255, 0.35);
+      transition: transform 0.25s var(--ease-spring), background 0.3s;
+    }
+
+    .status-pill:hover { transform: scale(1.05); }
+
+    /* Contenedor Principal */
+    .container {
+      max-width: 1160px;
+      margin: -68px auto 0;
+      padding: 0 18px;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* Hero Bancario */
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.45fr 1fr;
+      gap: 18px;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 860px) {
+      .hero-grid { grid-template-columns: 1fr; }
+    }
+
+    .account-hero-card {
+      background: var(--surface);
+      border-radius: 22px;
+      padding: 24px 26px;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--border-light);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.3s var(--ease-spring), box-shadow 0.3s var(--ease-spring);
+    }
+
+    .account-hero-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .hero-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .hero-eyebrow {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--emerald);
+      animation: pulseGlow 2s infinite;
+    }
+
+    .period-badge {
+      background: var(--bank-tint);
+      color: var(--bank-blue);
+      font-size: 0.76rem;
+      font-weight: 700;
+      padding: 5px 12px;
+      border-radius: 999px;
+    }
+
+    .hero-balance-row {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin: 12px 0 8px;
+      flex-wrap: wrap;
+    }
+
+    .hero-amount {
+      font-size: 2.55rem;
+      font-weight: 800;
+      letter-spacing: -1.2px;
+      color: var(--text-main);
+      line-height: 1.1;
+    }
+
+    .hero-currency {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      background: var(--surface-soft);
+      padding: 4px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border-light);
+    }
+
+    .hero-splits {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 14px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-light);
+    }
+
+    .split-box {
+      background: var(--surface-soft);
+      border: 1px solid var(--border-light);
+      border-radius: 14px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: border-color 0.2s, transform 0.2s var(--ease-spring);
+    }
+
+    .split-box:hover {
+      border-color: #cbd5e1;
+      transform: translateY(-2px);
+    }
+
+    .split-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .split-label {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .split-val {
+      font-size: 1.08rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-top: 2px;
+    }
+
+    /* Tarjeta Lateral de Métricas Semanales */
+    .weekly-metrics-card {
+      background: var(--surface);
+      border-radius: 22px;
+      padding: 22px;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--border-light);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .metric-tile {
+      background: var(--surface-soft);
+      border-radius: 16px;
+      padding: 14px 16px;
+      border: 1px solid var(--border-light);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.25s var(--ease-spring), box-shadow 0.25s;
+    }
+
+    .metric-tile:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .metric-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .metric-name {
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .metric-num {
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.4px;
+    }
+
+    /* Barra de Acciones Rápidas Bancarias */
+    .quick-actions-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    @media (max-width: 780px) {
+      .quick-actions-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .action-tile {
+      background: var(--surface);
+      border: 1px solid var(--border-light);
+      border-radius: 18px;
+      padding: 16px 12px;
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.28s var(--ease-spring);
+    }
+
+    .action-tile:hover:not(:disabled) {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+      border-color: #bfdbfe;
+    }
+
+    .action-tile:active:not(:disabled) {
+      transform: translateY(-1px) scale(0.98);
+    }
+
+    .action-tile:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .action-icon-wrap {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.28s var(--ease-spring);
+    }
+
+    .action-tile:hover:not(:disabled) .action-icon-wrap {
+      transform: scale(1.1) rotate(-3deg);
+    }
+
+    .action-text {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-main);
+      text-align: center;
+    }
+
+    /* Alerta Bloqueo Deuda Impagable */
+    .lockdown-alert {
+      background: var(--rose-bg);
+      border: 1.5px solid #fecaca;
+      border-left: 5px solid var(--rose);
+      color: #881337;
+      border-radius: 18px;
+      padding: 18px 22px;
+      margin-bottom: 20px;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      box-shadow: var(--shadow-sm);
+      animation: fadeSlideUp 0.35s var(--ease-spring);
+    }
+
+    /* Navegación Segmentada Tipo Banca */
+    .nav-pills-bar {
+      display: flex;
+      background: var(--surface);
+      padding: 6px;
+      border-radius: 16px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-light);
+      margin-bottom: 20px;
+      gap: 6px;
+      overflow-x: auto;
+    }
+
+    .nav-pill {
+      flex: 1;
+      background: transparent;
+      border: none;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.25s var(--ease-spring);
+      white-space: nowrap;
+    }
+
+    .nav-pill:hover:not(.active):not(.locked) {
+      background: var(--surface-soft);
+      color: var(--text-main);
+    }
+
+    .nav-pill.active {
+      background: var(--bank-navy);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(10, 25, 47, 0.2);
+    }
+
+    .nav-pill.locked {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* Secciones */
+    .section { display: none; }
+    .section.active {
+      display: block;
+      animation: fadeSlideUp 0.4s var(--ease-spring);
+    }
+
+    /* Paneles / Tarjetas */
+    .panel {
+      background: var(--surface);
+      border-radius: 20px;
+      padding: 22px 24px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-light);
+      margin-bottom: 20px;
+      transition: box-shadow 0.25s var(--ease-spring);
+    }
+
+    .panel:hover { box-shadow: var(--shadow-md); }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .panel-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      color: var(--text-main);
+    }
+
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+
+    /* Tarjetas Bancarias Visuales */
+    .bank-card-item {
+      border-radius: 20px;
+      padding: 22px;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 215px;
+      box-shadow: 0 12px 24px -8px rgba(15, 23, 42, 0.28);
+      transition: transform 0.35s var(--ease-spring), box-shadow 0.35s var(--ease-spring);
+    }
+
+    .bank-card-item:hover {
+      transform: translateY(-5px) scale(1.01);
+      box-shadow: 0 18px 32px -8px rgba(15, 23, 42, 0.36);
+    }
+
+    .bank-card-item.debit {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 60%, #2563eb 100%);
+    }
+
+    .bank-card-item.credit {
+      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 55%, #4f46e5 100%);
+    }
+
+    .bank-card-item::after {
+      content: "";
+      position: absolute;
+      right: -30px;
+      bottom: -40px;
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      pointer-events: none;
+    }
+
+    .card-chip-emv {
+      width: 36px;
+      height: 26px;
+      border-radius: 6px;
+      background: linear-gradient(135deg, #fde68a 0%, #f59e0b 100%);
+      opacity: 0.9;
+    }
+
+    .card-actions-footer {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Insights List */
+    .insight-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .insight-item {
+      background: var(--surface-soft);
+      border: 1px solid var(--border-light);
+      padding: 13px 16px;
+      border-radius: 14px;
+      font-size: 0.88rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      line-height: 1.45;
+      transition: transform 0.2s var(--ease-spring);
+    }
+
+    .insight-item:hover { transform: translateX(4px); }
+
+    .info-strip {
+      background: var(--bank-tint);
+      border: 1px solid #bfdbfe;
+      color: var(--bank-blue);
+      border-radius: 14px;
+      padding: 13px 18px;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+
+    /* Tablas Modernas */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      padding: 12px 14px;
+      text-align: left;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      background: var(--surface-soft);
+      border-bottom: 1px solid var(--border-light);
+    }
+    td {
+      padding: 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-light);
+      font-size: 0.87rem;
+      transition: background 0.15s;
+    }
+    tr:hover td { background: var(--surface-soft); }
+
+    .badge-pill {
+      padding: 4px 11px;
+      border-radius: 999px;
+      font-size: 0.73rem;
+      font-weight: 700;
+      color: #fff;
+      display: inline-block;
+    }
+
+    /* Botones */
+    .btn {
+      background: var(--bank-blue);
+      color: #fff;
+      border: none;
+      padding: 11px 20px;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 0.86rem;
+      transition: all 0.22s var(--ease-spring);
+    }
+
+    .btn:hover:not(:disabled) {
+      background: var(--bank-blue-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 15px rgba(37, 99, 235, 0.25);
+    }
+
+    .btn:active:not(:disabled) { transform: scale(0.98); }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .btn-emerald { background: var(--emerald); }
+    .btn-emerald:hover:not(:disabled) { background: #059669; box-shadow: 0 6px 15px rgba(16, 185, 129, 0.25); }
+
+    .btn-amber { background: var(--amber); color: #fff; }
+    .btn-amber:hover:not(:disabled) { background: #d97706; box-shadow: 0 6px 15px rgba(245, 158, 11, 0.25); }
+
+    .btn-rose { background: var(--rose); color: #fff; }
+    .btn-rose:hover:not(:disabled) { background: #dc2626; box-shadow: 0 6px 15px rgba(239, 68, 68, 0.25); }
+
+    .btn-glass {
+      background: rgba(255, 255, 255, 0.14);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(6px);
+    }
+    .btn-glass:hover { background: rgba(255, 255, 255, 0.24); box-shadow: none; }
+
+    .btn-soft { background: var(--bank-tint); color: var(--bank-blue); }
+    .btn-soft:hover { background: #dbeafe; box-shadow: none; }
+
+    .btn-ghost { background: transparent; color: var(--text-muted); }
+    .btn-ghost:hover { background: var(--surface-soft); color: var(--text-main); box-shadow: none; }
+
+    .btn-icon {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 7px;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .btn-icon:hover { background: var(--surface-soft); color: var(--bank-blue); }
+
+    /* Modales */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 25, 47, 0.58);
+      backdrop-filter: blur(5px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 500;
+      padding: 16px;
+    }
+
+    .modal-backdrop.open { display: flex; }
+
+    .modal-card {
+      background: var(--surface);
+      color: var(--text-main);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 490px;
+      padding: 26px;
+      box-shadow: var(--shadow-lg);
+      max-height: 92vh;
+      overflow-y: auto;
+      animation: fadeSlideUp 0.32s var(--ease-spring);
+    }
+
+    .modal-card.wide { max-width: 860px; }
+    .modal-title { margin: 0 0 16px; font-size: 1.18rem; font-weight: 800; color: var(--text-main); }
+
+    .field-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+    .field-group label { font-size: 0.79rem; font-weight: 700; color: var(--text-muted); }
+    .field-group input, .field-group select {
+      padding: 12px 14px;
+      border: 1.5px solid var(--border-light);
+      border-radius: 12px;
+      font-size: 0.92rem;
+      background: var(--surface);
+      color: var(--text-main);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .field-group input:focus, .field-group select:focus {
+      border-color: var(--bank-blue);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+      outline: none;
+    }
+
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+
+    .callout-box {
+      background: var(--bank-tint);
+      color: var(--bank-blue);
+      padding: 11px 14px;
+      border-radius: 12px;
+      font-size: 0.82rem;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 14px;
+      font-weight: 600;
+    }
+
+    .upload-dropzone {
+      border: 2px dashed var(--border-light);
+      border-radius: 14px;
+      padding: 16px;
+      text-align: center;
+      background: var(--surface-soft);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .upload-dropzone:hover { border-color: var(--bank-blue); background: var(--bank-tint); }
+
+    .receipt-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--bank-tint);
+      color: var(--bank-blue);
+      padding: 5px 11px;
+      border-radius: 9px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+    }
+
+    /* ============================================================
+       SECCIÓN DE CONFIGURACIÓN COMPLETA A PANTALLA COMPLETA
+       ============================================================ */
+    .fullscreen-settings-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      background: var(--bg-app);
+      color: var(--text-main);
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      animation: fadeSlideUp 0.28s var(--ease-spring);
+    }
+
+    .fullscreen-settings-overlay.open {
+      display: flex;
+    }
+
+    .settings-topbar {
+      background: linear-gradient(135deg, var(--bank-navy) 0%, #11294d 60%, var(--bank-indigo) 100%);
+      color: #fff;
+      padding: 16px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      box-shadow: 0 4px 16px rgba(10, 25, 47, 0.22);
+      flex-shrink: 0;
+    }
+
+    .settings-body {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      overflow: hidden;
+      max-width: 1380px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 820px) {
+      .settings-body {
+        grid-template-columns: 1fr;
+        overflow-y: auto;
+      }
+    }
+
+    .settings-sidebar {
+      background: var(--surface);
+      border-right: 1px solid var(--border-light);
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+    }
+
+    .settings-nav-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 13px 16px;
+      border-radius: 14px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-align: left;
+      transition: all 0.2s var(--ease-spring);
+    }
+
+    .settings-nav-btn:hover {
+      background: var(--surface-soft);
+      color: var(--text-main);
+    }
+
+    .settings-nav-btn.active {
+      background: var(--bank-tint);
+      color: var(--bank-blue);
+    }
+
+    .settings-nav-btn.danger-nav.active {
+      background: var(--rose-bg);
+      color: var(--rose);
+    }
+
+    .settings-content-area {
+      padding: 28px 34px;
+      overflow-y: auto;
+    }
+
+    .settings-pane { display: none; }
+    .settings-pane.active {
+      display: block;
+      animation: fadeSlideUp 0.3s var(--ease-spring);
+    }
+
+    .settings-card {
+      background: var(--surface);
+      border: 1px solid var(--border-light);
+      border-radius: 20px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .theme-option-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 14px;
+    }
+
+    .theme-choice {
+      border: 2px solid var(--border-light);
+      border-radius: 16px;
+      padding: 16px;
+      cursor: pointer;
+      background: var(--surface-soft);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .theme-choice.selected {
+      border-color: var(--bank-blue);
+      background: var(--bank-tint);
+    }
+
+    .swatch-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .color-swatch {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      border: 3px solid transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      transition: transform 0.2s;
+    }
+
+    .color-swatch.selected {
+      border-color: var(--text-main);
+      transform: scale(1.08);
+    }
+
+    .info-kv-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+    }
+
+    .info-kv-box {
+      background: var(--surface-soft);
+      border: 1px solid var(--border-light);
+      border-radius: 14px;
+      padding: 14px 16px;
+    }
+
+    .danger-zone-box {
+      border: 1.5px solid #fecaca;
+      background: var(--rose-bg);
+      border-radius: 18px;
+      padding: 22px;
+    }
+
+    /* Estilos OTA */
+    .ota-progress-track {
+      width: 100%;
+      height: 12px;
+      background: var(--surface-soft);
+      border: 1px solid var(--border-light);
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 10px 0 8px;
+    }
+
+    .ota-progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--bank-blue) 0%, var(--emerald) 100%);
+      transition: width 0.18s ease;
+    }
+
+    .ota-status-box {
+      background: var(--surface-soft);
+      border: 1px solid var(--border-light);
+      border-radius: 14px;
+      padding: 14px 16px;
+      font-size: 0.86rem;
+      line-height: 1.5;
+      margin-top: 14px;
+    }
+
+    .ota-status-box.success {
+      background: var(--emerald-bg);
+      border-color: rgba(16, 185, 129, 0.35);
+      color: var(--text-main);
+    }
+
+    .ota-status-box.error {
+      background: var(--rose-bg);
+      border-color: rgba(239, 68, 68, 0.4);
+      color: var(--text-main);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PANTALLA DE ARRANQUE / PREPARACIÓN / BORRADO / ERROR DE INICIO -->
+  <div id="splashScreen" class="fullscreen-overlay splash-screen">
+    <div>
+      <div class="splash-logo-box">
+        <span class="material-icons-round" style="font-size:50px; color:#fff;">account_balance</span>
+      </div>
+      <h1 class="splash-app-name">SIADFI</h1>
+      <div class="splash-app-tagline">Sistema Integral de Administración de Finanzas</div>
+
+      <!-- Modo Arranque Normal (Círculo girando tipo Google) -->
+      <div id="splashSpinnerMode">
+        <svg class="google-spinner" viewBox="25 25 50 50">
+          <circle cx="50" cy="50" r="20" fill="none" stroke-width="4.5"></circle>
+        </svg>
+      </div>
+
+      <!-- Modo Preparando App por Primer Uso (1 minuto) -->
+      <div id="splashFirstSetupMode" style="display:none; max-width:420px; margin:0 auto;">
+        <div style="font-size:1.15rem; font-weight:700; color:#bae6fd; margin-bottom:16px;">
+          Preparando la app para su primer uso, Espere un Momento
+        </div>
+        <div style="width:100%; height:6px; background:rgba(255,255,255,0.16); border-radius:999px; overflow:hidden;">
+          <div id="setupProgressBar" style="width:0%; height:100%; background:#38bdf8; transition:width 0.5s linear;"></div>
+        </div>
+      </div>
+
+      <!-- Modo Borrando Datos y Restableciendo -->
+      <div id="splashEraseMode" style="display:none; max-width:420px; margin:0 auto;">
+        <div style="font-size:1.15rem; font-weight:700; color:#fecaca; margin-bottom:16px;">
+          Borrando Datos, Espere
+        </div>
+        <div style="width:100%; height:6px; background:rgba(255,255,255,0.16); border-radius:999px; overflow:hidden;">
+          <div id="eraseProgressBar" style="width:0%; height:100%; background:#f87171; transition:width 0.25s linear;"></div>
+        </div>
+      </div>
+
+      <!-- Modo Manejo de Errores de Inicio -->
+      <div id="splashErrorMode" class="boot-error-box" style="display:none;">
+        <span class="material-icons-round" style="font-size:42px; color:#f87171; margin-bottom:8px;">error_outline</span>
+        <div style="font-size:1.25rem; font-weight:800; color:#fff; margin-bottom:8px;">
+          No se pudo iniciar la aplicacion
+        </div>
+        <div id="splashErrorDetail" style="font-size:0.88rem; color:#fecaca; line-height:1.5; margin-bottom:16px;"></div>
+        <button type="button" class="btn btn-rose" onclick="location.reload()">
+          <span class="material-icons-round">refresh</span> Reintentar Arranque
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ASISTENTE DE CONFIGURACIÓN INICIAL (SOLO PRIMER USO SIN DATOS EN LOCAL STORAGE) -->
+  <div id="onboardingScreen" class="fullscreen-overlay onboarding-screen" style="display:none;">
+    <div class="onboarding-card">
+      <div class="step-indicator">
+        <div id="dotStep1" class="step-dot active"></div>
+        <div id="dotStep2" class="step-dot"></div>
+        <div id="dotStep3" class="step-dot"></div>
+      </div>
+
+      <!-- PASO 1: BIENVENIDA -->
+      <div id="onbStep1">
+        <div style="text-align:center; padding:16px 0;">
+          <div style="width:68px; height:68px; border-radius:20px; background:var(--bank-tint); color:var(--bank-blue); display:flex; align-items:center; justify-content:center; margin:0 auto 18px;">
+            <span class="material-icons-round" style="font-size:36px;">waving_hand</span>
+          </div>
+          <h2 style="margin:0 0 10px; font-size:1.65rem; font-weight:800;">
+            Bienvenido a SIADFI
+          </h2>
+          <p style="color:var(--text-muted); font-size:0.96rem; max-width:520px; margin:0 auto 28px; line-height:1.6;">
+            Tu plataforma personal de control financiero, administración de fondos semanales, tarjetas y constancias oficiales en PDF. Configuremos tu perfil inicial en unos sencillos pasos.
+          </p>
+          <button type="button" class="btn" style="padding:13px 28px; font-size:0.95rem;" onclick="goToOnboardingStep(2)">
+            Comenzar Configuración <span class="material-icons-round">arrow_forward</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- PASO 2: FORMULARIO DE DATOS PERSONALES Y FISCALES -->
+      <div id="onbStep2" style="display:none;">
+        <h2 style="margin:0 0 6px; font-size:1.35rem; font-weight:800;">
+          Datos del Titular
+        </h2>
+        <p style="margin:0 0 18px; font-size:0.86rem; color:var(--text-muted);">
+          Completa tu información personal y fiscal para personalizar tu cuenta y constancias.
+        </p>
+
+        <form onsubmit="submitOnboardingData(event)">
+          <div class="grid-3">
+            <div class="field-group">
+              <label for="onbFirstName">Nombre(s)</label>
+              <input type="text" id="onbFirstName" required>
+            </div>
+            <div class="field-group">
+              <label for="onbLastNameP">Apellido Paterno</label>
+              <input type="text" id="onbLastNameP" required>
+            </div>
+            <div class="field-group">
+              <label for="onbLastNameM">Apellido Materno</label>
+              <input type="text" id="onbLastNameM" required>
+            </div>
+          </div>
+
+          <div class="grid-3">
+            <div class="field-group">
+              <label for="onbBirthDate">Fecha de Nacimiento</label>
+              <input type="date" id="onbBirthDate" required>
+            </div>
+            <div class="field-group">
+              <label for="onbRfc">RFC</label>
+              <input type="text" id="onbRfc" maxlength="13" required>
+            </div>
+            <div class="field-group">
+              <label for="onbCurp">CURP</label>
+              <input type="text" id="onbCurp" maxlength="18" required>
+            </div>
+          </div>
+
+          <div style="background:var(--surface-soft); border:1px solid var(--border-light); border-radius:16px; padding:16px; margin-bottom:16px;">
+            <div style="font-size:0.88rem; font-weight:800; margin-bottom:12px; display:flex; align-items:center; gap:6px;">
+              <span class="material-icons-round" style="color:var(--bank-blue); font-size:18px;">location_on</span>
+              Domicilio
+            </div>
+
+            <div class="grid-3">
+              <div class="field-group">
+                <label for="onbState">Estado</label>
+                <input type="text" id="onbState" required>
+              </div>
+              <div class="field-group">
+                <label for="onbCp">CP</label>
+                <input type="text" id="onbCp" maxlength="5" required>
+              </div>
+              <div class="field-group">
+                <label for="onbMunicipio">Municipio</label>
+                <input type="text" id="onbMunicipio" required>
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div class="field-group">
+                <label for="onbColonia">Colonia</label>
+                <input type="text" id="onbColonia" required>
+              </div>
+              <div class="field-group">
+                <label for="onbCalle">Calle</label>
+                <input type="text" id="onbCalle" required>
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div class="field-group" style="margin-bottom:0;">
+                <label for="onbNumExt">Número Exterior</label>
+                <input type="text" id="onbNumExt" required>
+              </div>
+              <div class="field-group" style="margin-bottom:0;">
+                <label for="onbNumInt">Número Interior (Opcional)</label>
+                <input type="text" id="onbNumInt">
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; gap:10px;">
+            <button type="button" class="btn btn-ghost" onclick="goToOnboardingStep(1)">
+              <span class="material-icons-round">arrow_back</span> Atrás
+            </button>
+            <button type="submit" class="btn">
+              Continuar <span class="material-icons-round">arrow_forward</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- PASO 3: TÉRMINOS Y CONDICIONES -->
+      <div id="onbStep3" style="display:none;">
+        <h2 style="margin:0 0 6px; font-size:1.35rem; font-weight:800;">
+          Términos y Condiciones de Uso
+        </h2>
+        <p style="margin:0 0 14px; font-size:0.86rem; color:var(--text-muted);">
+          Lee detenidamente y acepta los términos para finalizar la configuración inicial.
+        </p>
+
+        <div class="terms-box">
+          <strong>1. Objeto y Naturaleza del Sistema:</strong> SIADFI (Sistema Integral de Administración de Finanzas) es una herramienta digital diseñada para el registro, control y visualización de finanzas personales, presupuestos semanales, tarjetas y generación de reportes informativos.<br><br>
+          <strong>2. Privacidad y Almacenamiento Local:</strong> Toda la información personal, fiscal y financiera ingresada por el usuario se almacena de forma local en su propio dispositivo mediante almacenamiento del navegador. Ningún dato es transmitido a servidores externos sin intervención directa del titular.<br><br>
+          <strong>3. Responsabilidad del Titular:</strong> El usuario es responsable de la veracidad de los datos capturados y del resguardo de su dispositivo. Los dictámenes y constancias generadas en PDF tienen carácter de control administrativo interno.<br><br>
+          <strong>4. Prevención de Sobreendeudamiento:</strong> El sistema integra alertas y bloqueos preventivos automáticos cuando las deudas registradas superan el respaldo líquido disponible, con el fin de promover una administración financiera saludable.
+        </div>
+
+        <label class="checkbox-card">
+          <input type="checkbox" id="acceptTermsCheck" onchange="toggleFinishOnboardingBtn()">
+          <span>He leído y acepto los Términos y Condiciones de uso de SIADFI.</span>
+        </label>
+
+        <div style="display:flex; justify-content:space-between; gap:10px;">
+          <button type="button" class="btn btn-ghost" onclick="goToOnboardingStep(2)">
+            <span class="material-icons-round">arrow_back</span> Atrás
+          </button>
+          <button type="button" id="btnFinishOnboarding" class="btn btn-emerald" disabled onclick="completeInitialSetup()">
+            Aceptar y Finalizar <span class="material-icons-round">check_circle</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- APLICACIÓN PRINCIPAL -->
+  <div id="mainAppWrapper" style="display:none;">
+    <!-- Encabezado Bancario -->
+    <header class="bank-topbar">
+      <div class="topbar-inner">
+        <div class="brand-group">
+          <div class="brand-emblem">
+            <span class="material-icons-round" style="font-size:26px; color:#fff;">account_balance</span>
+          </div>
+          <div>
+            <h1 class="brand-title">SIADFI <span class="brand-badge">Banca Personal</span></h1>
+            <div class="brand-subtitle">Sistema Integral de Administración de Finanzas</div>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <div class="user-chip">
+            <div class="user-avatar" id="topbarAvatar">TF</div>
+            <div style="line-height:1.2;">
+              <div id="topbarUserName" style="font-size:0.82rem; font-weight:700;">Titular Financiero</div>
+              <div id="topbarFiscalMini" style="font-size:0.7rem; color:#cbd5e1;">Perfil fiscal</div>
+            </div>
+          </div>
+          <button class="btn btn-glass" onclick="openFullSettings()">
+            <span class="material-icons-round" style="font-size:18px;">settings</span> Configuración
+          </button>
+          <div id="statusBadge" class="status-pill" style="background: var(--emerald);" title="Estatus Financiero Actual">EST</div>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <!-- Hero Grid -->
+      <section class="hero-grid animate-in">
+        <div class="account-hero-card">
+          <div>
+            <div class="hero-header-row">
+              <span class="hero-eyebrow">
+                <span class="live-dot"></span> Liquidez Total Disponible
+              </span>
+              <span class="period-badge" id="periodLabel">Semana: Cargando...</span>
+            </div>
+
+            <div class="hero-balance-row">
+              <div class="hero-amount" id="heroLiquidity">$0.00</div>
+              <span class="hero-currency">MXN</span>
+            </div>
+          </div>
+
+          <div class="hero-splits">
+            <div class="split-box">
+              <div class="split-icon" style="background: var(--emerald-bg); color: var(--emerald);">
+                <span class="material-icons-round">savings</span>
+              </div>
+              <div>
+                <div class="split-label">Fondo Semanal</div>
+                <div class="split-val" id="heroWeeklyFund">$0.00</div>
+              </div>
+            </div>
+
+            <div class="split-box">
+              <div class="split-icon" style="background: var(--bank-tint); color: var(--bank-blue);">
+                <span class="material-icons-round">credit_card</span>
+              </div>
+              <div>
+                <div class="split-label">Saldo en Débito</div>
+                <div class="split-val" id="heroDebitBalance">$0.00</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="weekly-metrics-card">
+          <div class="metric-tile">
+            <div class="metric-top">
+              <span class="metric-name">Fondo Semanal</span>
+              <span class="material-icons-round" style="color:var(--bank-blue); font-size:20px;">account_balance_wallet</span>
+            </div>
+            <div class="metric-num" id="kpiFondoSemanal" style="color: var(--bank-blue);">$0.00</div>
+          </div>
+
+          <div class="metric-tile">
+            <div class="metric-top">
+              <span class="metric-name">Gastos Semana</span>
+              <span class="material-icons-round" style="color:var(--rose); font-size:20px;">trending_down</span>
+            </div>
+            <div class="metric-num" id="kpiGastos" style="color: var(--rose);">$0.00</div>
+          </div>
+
+          <div class="metric-tile">
+            <div class="metric-top">
+              <span class="metric-name">Ahorros Semana</span>
+              <span class="material-icons-round" style="color:var(--emerald); font-size:20px;">trending_up</span>
+            </div>
+            <div class="metric-num" id="kpiAhorros" style="color: var(--emerald);">$0.00</div>
+          </div>
+
+          <div class="metric-tile">
+            <div class="metric-top">
+              <span class="metric-name">Deudas Crédito</span>
+              <span class="material-icons-round" style="color:var(--amber); font-size:20px;">credit_score</span>
+            </div>
+            <div class="metric-num" id="kpiDeudas" style="color: var(--amber);">$0.00</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Accesos Rápidos -->
+      <div class="quick-actions-grid animate-in">
+        <button class="action-tile" onclick="openModal('weeklyFundModal')">
+          <div class="action-icon-wrap" style="background: var(--emerald-bg); color: var(--emerald);">
+            <span class="material-icons-round">add_business</span>
+          </div>
+          <span class="action-text">Fondos Semanales</span>
+        </button>
+
+        <button class="action-tile" id="btnQuickMov" onclick="openModal('movModal')">
+          <div class="action-icon-wrap" style="background: var(--bank-tint); color: var(--bank-blue);">
+            <span class="material-icons-round">swap_vert</span>
+          </div>
+          <span class="action-text">Nuevo Movimiento</span>
+        </button>
+
+        <button class="action-tile" onclick="openModal('cardModal')">
+          <div class="action-icon-wrap" style="background: #eef2ff; color: #4f46e5;">
+            <span class="material-icons-round">add_card</span>
+          </div>
+          <span class="action-text">Agregar Tarjeta</span>
+        </button>
+
+        <button class="action-tile" onclick="goToCardsToPay()">
+          <div class="action-icon-wrap" style="background: var(--amber-bg); color: var(--amber);">
+            <span class="material-icons-round">payments</span>
+          </div>
+          <span class="action-text">Gestionar Tarjetas</span>
+        </button>
+
+        <button class="action-tile" id="btnQuickCert" onclick="createCertificateRecord(false)">
+          <div class="action-icon-wrap" style="background: var(--surface-soft); color: var(--bank-blue);">
+            <span class="material-icons-round">description</span>
+          </div>
+          <span class="action-text">Emitir Constancia</span>
+        </button>
+      </div>
+
+      <!-- Alerta Bloqueo por Deuda Impagable -->
+      <div id="debtLockdownBanner" class="lockdown-alert">
+        <div style="display:flex; align-items:flex-start; gap:14px;">
+          <span class="material-icons-round" style="font-size:32px; color:var(--rose);">gpp_bad</span>
+          <div>
+            <div style="font-weight:800; font-size:0.98rem;">BLOQUEO PREVENTIVO SIADFI: DEUDA IMPAGABLE DETECTADA</div>
+            <div id="debtLockdownText" style="font-size:0.86rem; margin-top:4px; line-height:1.4;"></div>
+          </div>
+        </div>
+        <button class="btn btn-emerald" onclick="goToCardsToPay()">
+          <span class="material-icons-round">payments</span> Pagar Deudas Ahora
+        </button>
+      </div>
+
+      <!-- Navegación Principal -->
+      <nav class="nav-pills-bar">
+        <button class="nav-pill active" data-tab="sec-resumen" onclick="switchTab('sec-resumen', this)">
+          <span class="material-icons-round">space_dashboard</span> Resumen General
+        </button>
+        <button class="nav-pill" data-tab="sec-movimientos" onclick="switchTab('sec-movimientos', this)">
+          <span class="material-icons-round">receipt_long</span> Actividad Semanal
+        </button>
+        <button class="nav-pill" data-tab="sec-tarjetas" onclick="switchTab('sec-tarjetas', this)">
+          <span class="material-icons-round">credit_card</span> Mis Tarjetas
+        </button>
+        <button class="nav-pill" data-tab="sec-constancias" onclick="switchTab('sec-constancias', this)">
+          <span class="material-icons-round">verified</span> Constancias PDF
+        </button>
+      </nav>
+
+      <!-- SECCIÓN 1: RESUMEN GENERAL -->
+      <section id="sec-resumen" class="section active">
+        <div class="grid-2">
+          <div class="panel">
+            <div class="panel-header">
+              <h2 class="panel-title">
+                <span class="material-icons-round" style="color: var(--bank-blue);">insights</span>
+                Diagnóstico Financiero SIADFI
+              </h2>
+              <span class="period-badge">En tiempo real</span>
+            </div>
+            <ul id="summaryInsightsList" class="insight-list"></ul>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <h2 class="panel-title">
+                <span class="material-icons-round" style="color: var(--bank-blue);">pie_chart</span>
+                Distribución de Recursos
+              </h2>
+            </div>
+            <div style="max-width: 340px; margin: 0 auto;">
+              <canvas id="financeChart" height="230"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN 2: MOVIMIENTOS -->
+      <section id="sec-movimientos" class="section">
+        <div class="info-strip">
+          <span class="material-icons-round">info</span>
+          <span id="movementsAdvice">Analizando actividad de la semana...</span>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Movimientos de la Semana (Lunes a Domingo)</h2>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn btn-soft" onclick="openModal('weeklyFundModal')">
+                <span class="material-icons-round">account_balance_wallet</span> Fondos Semanales
+              </button>
+              <button class="btn" id="btnAddMovTab" onclick="openModal('movModal')">
+                <span class="material-icons-round">add</span> Nuevo Movimiento
+              </button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Tipo</th>
+                  <th>Concepto</th>
+                  <th>Cuenta / Tarjeta</th>
+                  <th>Comprobante</th>
+                  <th>Monto</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="movTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN 3: TARJETAS Y DEUDAS -->
+      <section id="sec-tarjetas" class="section">
+        <div class="info-strip">
+          <span class="material-icons-round">credit_card</span>
+          <span id="cardsAdvice">Administra tus tarjetas de débito, transfiere fondos semanales y actualiza o liquida el saldo de tus tarjetas de crédito.</span>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Billetera de Tarjetas</h2>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn btn-soft" onclick="openModal('weeklyFundModal')">
+                <span class="material-icons-round">swap_horiz</span> Transferir Fondo a Tarjeta
+              </button>
+              <button class="btn" onclick="openModal('cardModal')">
+                <span class="material-icons-round">add_card</span> Nueva Tarjeta
+              </button>
+            </div>
+          </div>
+          <div id="cardsGrid" class="grid-3"></div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN 4: CONSTANCIAS PDF -->
+      <section id="sec-constancias" class="section">
+        <div class="info-strip">
+          <span class="material-icons-round">verified_user</span>
+          <span>Emisión de constancias ejecutivas en PDF con desglose de fondos semanales, tarjetas y actividad del periodo.</span>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Historial de Constancias SIADFI</h2>
+            <button class="btn" onclick="createCertificateRecord(false)">
+              <span class="material-icons-round">post_add</span> Generar Constancia
+            </button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Folio</th>
+                  <th>Periodo</th>
+                  <th>Emisión</th>
+                  <th>Estatus</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="certTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- =========================================================================
+       SECCIÓN DE CONFIGURACIÓN COMPLETA (A PANTALLA COMPLETA)
+       ========================================================================= -->
+  <div id="fullSettingsScreen" class="fullscreen-settings-overlay">
+    <div class="settings-topbar">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <div style="width:40px; height:40px; border-radius:12px; background:rgba(255,255,255,0.14); display:flex; align-items:center; justify-content:center;">
+          <span class="material-icons-round">settings</span>
+        </div>
+        <div>
+          <div style="font-size:1.15rem; font-weight:800;">Configuración Completa SIADFI</div>
+          <div style="font-size:0.78rem; color:#cbd5e1;">Perfil del titular, apariencia, respaldos, actualizaciones y restablecimiento</div>
+        </div>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:10px;">
+        <button type="button" class="btn btn-emerald" onclick="saveAndExitFullSettings()">
+          <span class="material-icons-round">save</span> Guardar Cambios y Salir
+        </button>
+      </div>
+    </div>
+
+    <div class="settings-body">
+      <!-- Barra lateral de categorías -->
+      <aside class="settings-sidebar">
+        <button type="button" class="settings-nav-btn active" data-pane="pane-perfil" onclick="switchSettingsPane('pane-perfil', this)">
+          <span class="material-icons-round">badge</span> Perfil del Titular y Datos Fiscales
+        </button>
+        <button type="button" class="settings-nav-btn" data-pane="pane-apariencia" onclick="switchSettingsPane('pane-apariencia', this)">
+          <span class="material-icons-round">palette</span> Apariencia y Parámetros
+        </button>
+        <button type="button" class="settings-nav-btn" data-pane="pane-respaldo" onclick="switchSettingsPane('pane-respaldo', this)">
+          <span class="material-icons-round">backup</span> Copia de Seguridad
+        </button>
+        <button type="button" class="settings-nav-btn" data-pane="pane-actualizaciones" onclick="switchSettingsPane('pane-actualizaciones', this)">
+          <span class="material-icons-round">system_update</span> Actualizaciones
+        </button>
+        <button type="button" class="settings-nav-btn" data-pane="pane-info" onclick="switchSettingsPane('pane-info', this)">
+          <span class="material-icons-round">info</span> Información de la App
+        </button>
+        <button type="button" class="settings-nav-btn danger-nav" data-pane="pane-borrar" onclick="switchSettingsPane('pane-borrar', this)">
+          <span class="material-icons-round">delete_forever</span> Borrar Datos y Restablecer
+        </button>
+      </aside>
+
+      <!-- Área de contenido -->
+      <div class="settings-content-area">
+        <!-- PESTAÑA 1: PERFIL DEL TITULAR Y DATOS FISCALES -->
+        <div id="pane-perfil" class="settings-pane active">
+          <div class="settings-card">
+            <h2 class="panel-title" style="margin-bottom:16px;">
+              <span class="material-icons-round" style="color:var(--bank-blue);">person</span>
+              Identidad del Titular y Registro Fiscal
+            </h2>
+            <div class="grid-3">
+              <div class="field-group">
+                <label for="cfgFirstName">Nombre(s)</label>
+                <input type="text" id="cfgFirstName">
+              </div>
+              <div class="field-group">
+                <label for="cfgLastNameP">Apellido Paterno</label>
+                <input type="text" id="cfgLastNameP">
+              </div>
+              <div class="field-group">
+                <label for="cfgLastNameM">Apellido Materno</label>
+                <input type="text" id="cfgLastNameM">
+              </div>
+            </div>
+
+            <div class="grid-3">
+              <div class="field-group">
+                <label for="cfgBirthDate">Fecha de Nacimiento</label>
+                <input type="date" id="cfgBirthDate">
+              </div>
+              <div class="field-group">
+                <label for="cfgRfc">RFC</label>
+                <input type="text" id="cfgRfc" maxlength="13">
+              </div>
+              <div class="field-group">
+                <label for="cfgCurp">CURP</label>
+                <input type="text" id="cfgCurp" maxlength="18">
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <h2 class="panel-title" style="margin-bottom:16px;">
+              <span class="material-icons-round" style="color:var(--bank-blue);">location_on</span>
+              Domicilio Fiscal y Particular
+            </h2>
+            <div class="grid-3">
+              <div class="field-group">
+                <label for="cfgState">Estado</label>
+                <input type="text" id="cfgState">
+              </div>
+              <div class="field-group">
+                <label for="cfgCp">CP</label>
+                <input type="text" id="cfgCp" maxlength="5">
+              </div>
+              <div class="field-group">
+                <label for="cfgMunicipio">Municipio</label>
+                <input type="text" id="cfgMunicipio">
+              </div>
+            </div>
+            <div class="grid-2">
+              <div class="field-group">
+                <label for="cfgColonia">Colonia</label>
+                <input type="text" id="cfgColonia">
+              </div>
+              <div class="field-group">
+                <label for="cfgCalle">Calle</label>
+                <input type="text" id="cfgCalle">
+              </div>
+            </div>
+            <div class="grid-2">
+              <div class="field-group" style="margin-bottom:0;">
+                <label for="cfgNumExt">Número Exterior</label>
+                <input type="text" id="cfgNumExt">
+              </div>
+              <div class="field-group" style="margin-bottom:0;">
+                <label for="cfgNumInt">Número Interior (Opcional)</label>
+                <input type="text" id="cfgNumInt">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PESTAÑA 2: APARIENCIA Y PARÁMETROS -->
+        <div id="pane-apariencia" class="settings-pane">
+          <div class="settings-card">
+            <h2 class="panel-title" style="margin-bottom:16px;">
+              <span class="material-icons-round" style="color:var(--bank-blue);">contrast</span>
+              Tema Visual de la Interfaz
+            </h2>
+            <div class="theme-option-grid">
+              <div class="theme-choice" id="themeOptLight" onclick="selectAppearanceTheme('light')">
+                <div style="display:flex; align-items:center; gap:8px; font-weight:800;">
+                  <span class="material-icons-round" style="color:#f59e0b;">light_mode</span> Modo Claro
+                </div>
+                <div style="font-size:0.8rem; color:var(--text-muted);">Interfaz luminosa de alto contraste para uso diurno.</div>
+              </div>
+              <div class="theme-choice" id="themeOptDark" onclick="selectAppearanceTheme('dark')">
+                <div style="display:flex; align-items:center; gap:8px; font-weight:800;">
+                  <span class="material-icons-round" style="color:#38bdf8;">dark_mode</span> Modo Oscuro
+                </div>
+                <div style="font-size:0.8rem; color:var(--text-muted);">Superficies oscuras que reducen la fatiga visual.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <h2 class="panel-title" style="margin-bottom:16px;">
+              <span class="material-icons-round" style="color:var(--bank-blue);">color_lens</span>
+              Color de Acento y Densidad
+            </h2>
+            <div class="field-group">
+              <label>Color Principal del Sistema</label>
+              <div class="swatch-row">
+                <button type="button" class="color-swatch" data-accent="blue" style="background:#2563eb;" onclick="selectAppearanceAccent('blue')" title="Azul Bancario">
+                  <span class="material-icons-round">check</span>
+                </button>
+                <button type="button" class="color-swatch" data-accent="emerald" style="background:#059669;" onclick="selectAppearanceAccent('emerald')" title="Verde Esmeralda">
+                  <span class="material-icons-round">check</span>
+                </button>
+                <button type="button" class="color-swatch" data-accent="indigo" style="background:#4f46e5;" onclick="selectAppearanceAccent('indigo')" title="Índigo Ejecutivo">
+                  <span class="material-icons-round">check</span>
+                </button>
+                <button type="button" class="color-swatch" data-accent="slate" style="background:#334155;" onclick="selectAppearanceAccent('slate')" title="Gris Pizarra">
+                  <span class="material-icons-round">check</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="grid-2" style="margin-top:16px;">
+              <div class="field-group" style="margin-bottom:0;">
+                <label for="cfgDensity">Densidad de Tablas y Paneles</label>
+                <select id="cfgDensity" onchange="previewDensityChange()">
+                  <option value="comfortable">Estándar (Espaciado cómodo)</option>
+                  <option value="compact">Compacto (Mayor densidad de datos)</option>
+                </select>
+              </div>
+              <div class="field-group" style="margin-bottom:0;">
+                <label for="cfgThreshold">Umbral de Alerta de Deuda Grande ($ MXN)</label>
+                <input type="number" id="cfgThreshold" step="0.01" min="0">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PESTAÑA 3: COPIA DE SEGURIDAD -->
+        <div id="pane-respaldo" class="settings-pane">
+          <div class="settings-card">
+            <h2 class="panel-title" style="margin-bottom:12px;">
+              <span class="material-icons-round" style="color:var(--bank-blue);">cloud_download</span>
+              Exportar Copia de Seguridad
+            </h2>
+            <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:18px; line-height:1.5;">
+              Descarga un archivo de respaldo completo en formato JSON con tu perfil del titular, datos fiscales, tarjetas, fondos semanales, movimientos, comprobantes y constancias emitidas.
+            </p>
+            <button type="button" class="btn" onclick="exportBackupJson()">
+              <span class="material-icons-round">download</span> Descargar Respaldo Completo (.json)
+            </button>
+          </div>
+
+          <div class="settings-card">
+            <h2 class="panel-title" style="margin-bottom:12px;">
+              <span class="material-icons-round" style="color:var(--emerald);">restore_page</span>
+              Restaurar Copia de Seguridad
+            </h2>
+            <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:16px; line-height:1.5;">
+              Selecciona un archivo de respaldo generado previamente por SIADFI para restaurar toda tu información.
+            </p>
+            <div class="upload-dropzone" onclick="document.getElementById('backupFileInput').click()">
+              <span class="material-icons-round" style="font-size:34px; color:var(--bank-blue);">upload_file</span>
+              <div id="backupStatusText" style="font-size:0.88rem; font-weight:700; margin-top:6px;">
+                Haz clic aquí para seleccionar tu archivo de respaldo (.json)
+              </div>
+            </div>
+            <input type="file" id="backupFileInput" accept=".json,application/json" style="display:none;" onchange="importBackupJson(event)">
+          </div>
+        </div>
+
+        <!-- PESTAÑA 4: ACTUALIZACIONES OTA -->
+        <div id="pane-actualizaciones" class="settings-pane">
+          <div class="settings-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+              <div>
+                <h2 class="panel-title" style="margin-bottom:6px;">
+                  <span class="material-icons-round" style="color:var(--bank-blue);">system_update</span>
+                  Actualizaciones Over-the-Air (OTA)
+                </h2>
+                <div style="font-size:0.86rem; color:var(--text-muted);">
+                  Comprueba, descarga e instala parches remotos sin perder tus datos financieros locales.
+                </div>
+              </div>
+              <span class="period-badge" id="otaInstalledVersionBadge">Versión instalada: 1.0.0</span>
+            </div>
+
+            <div class="info-kv-grid" style="margin-bottom:18px;">
+              <div class="info-kv-box">
+                <div style="font-size:0.75rem; color:var(--text-muted); font-weight:700;">VERSIÓN ACTUAL INSTALADA</div>
+                <div id="otaCurrentVersionText" style="font-size:1.05rem; font-weight:800; margin-top:4px;">1.0.0</div>
+              </div>
+              <div class="info-kv-box">
+                <div style="font-size:0.75rem; color:var(--text-muted); font-weight:700;">CANAL REMOTO</div>
+                <div style="font-size:0.86rem; font-weight:700; margin-top:4px; word-break:break-all;">https://kayrox.qzz.io/siadfiota.json</div>
+              </div>
+              <div class="info-kv-box">
+                <div style="font-size:0.75rem; color:var(--text-muted); font-weight:700;">ESTADO DE PARCHE LOCAL</div>
+                <div id="otaLocalPatchStatus" style="font-size:0.88rem; font-weight:800; margin-top:4px;">Sin parche OTA aplicado</div>
+              </div>
+            </div>
+
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+              <button type="button" class="btn" id="btnCheckOtaUpdates" onclick="checkForOtaUpdates()">
+                <span class="material-icons-round">cloud_sync</span> Buscar Actualizaciones
+              </button>
+
+              <button type="button" class="btn btn-emerald" id="btnRestartProgramOta" style="display:none;" onclick="restartProgramOta()">
+                <span class="material-icons-round">restart_alt</span> Reiniciar Programa
+              </button>
+            </div>
+
+            <!-- Interfaz de Descarga con Barra de Progreso en Tiempo Real -->
+            <div id="otaProgressSection" style="display:none; margin-top:18px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; font-weight:700;">
+                <span id="otaDownloadStageLabel">Descargando actualización...</span>
+                <span id="otaProgressPercent">0%</span>
+              </div>
+              <div class="ota-progress-track">
+                <div id="otaProgressBarFill" class="ota-progress-fill"></div>
+              </div>
+              <div id="otaDownloadBytesLabel" style="font-size:0.76rem; color:var(--text-muted);">0 bytes / 0 bytes</div>
+            </div>
+
+            <!-- Mensajes de Estado / Error OTA -->
+            <div id="otaStatusMessageBox" class="ota-status-box">
+              Presiona <strong>Buscar Actualizaciones</strong> para verificar si existe una versión superior a <strong>1.0.0</strong>.
+            </div>
+          </div>
+        </div>
+
+        <!-- PESTAÑA 5: INFORMACIÓN DE LA APP -->
+        <div id="pane-info" class="settings-pane">
+          <div class="settings-card">
+            <div style="display:flex; align-items:center; gap:16px; margin-bottom:20px;">
+              <div style="width:60px; height:60px; border-radius:18px; background:linear-gradient(135deg, #38bdf8 0%, #2563eb 100%); display:flex; align-items:center; justify-content:center; color:#fff;">
+                <span class="material-icons-round" style="font-size:32px;">account_balance</span>
+              </div>
+              <div>
+                <h2 style="margin:0; font-size:1.3rem; font-weight:800;">SIADFI</h2>
+                <div style="font-size:0.86rem; color:var(--text-muted);">Sistema Integral de Administración de Finanzas Personales</div>
+              </div>
+            </div>
+
+            <div class="info-kv-grid">
+              <div class="info-kv-box">
+                <div style="font-size:0.75rem; color:var(--text-muted); font-weight:700;">VERSIÓN DEL SISTEMA</div>
+                <div id="infoSystemVersionText" style="font-size:1rem; font-weight:800; margin-top:4px;">1.0.0</div>
+              </div>
+              <div class="info-kv-box">
+                <div style="font-size:0.75rem; color:var(--text-muted); font-weight:700;">MOTOR DE ALMACENAMIENTO</div>
+                <div style="font-size:1rem; font-weight:800; margin-top:4px;">LocalStorage Encriptado Local</div>
+              </div>
+              <div class="info-kv-box">
+                <div style="font-size:0.75rem; color:var(--text-muted); font-weight:700;">REGISTROS ALMACENADOS</div>
+                <div id="infoRecordsCount" style="font-size:1rem; font-weight:800; margin-top:4px;">0 movimientos • 0 tarjetas</div>
+              </div>
+              <div class="info-kv-box">
+                <div style="font-size:0.75rem; color:var(--text-muted); font-weight:700;">COMPATIBILIDAD</div>
+                <div style="font-size:1rem; font-weight:800; margin-top:4px;">Navegadores Modernos (Sin IE)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PESTAÑA 6: BORRAR DATOS Y RESTABLECER -->
+        <div id="pane-borrar" class="settings-pane">
+          <div class="settings-card">
+            <h2 class="panel-title" style="color:var(--rose); margin-bottom:14px;">
+              <span class="material-icons-round">warning</span>
+              Zona de Restablecimiento de Fábrica
+            </h2>
+            <div class="danger-zone-box">
+              <div style="font-weight:800; font-size:1rem; color:#991b1b; margin-bottom:8px;">
+                Eliminar todos los datos y restablecer la aplicación
+              </div>
+              <p style="font-size:0.86rem; color:#7f1d1d; line-height:1.55; margin:0 0 18px;">
+                Esta acción eliminará permanentemente tu perfil del titular, datos fiscales, tarjetas registradas, fondos semanales, movimientos, comprobantes, parches OTA y constancias emitidas del almacenamiento local. Al finalizar, la aplicación volverá a su estado de fábrica.
+              </p>
+              <button type="button" class="btn btn-rose" onclick="resetAndEraseAllData()">
+                <span class="material-icons-round">delete_forever</span> Borrar Todos los Datos y Restablecer
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Gestión de Fondos Semanales -->
+  <div id="weeklyFundModal" class="modal-backdrop" onclick="closeBackdrop(event, 'weeklyFundModal')">
+    <div class="modal-card">
+      <h2 class="modal-title">Gestión de Fondos Semanales</h2>
+      <div class="callout-box">
+        <span class="material-icons-round" style="color:var(--emerald); font-size:20px;">account_balance_wallet</span>
+        <div>
+          Saldo actual del Fondo Semanal: <strong id="modalWeeklyFundBalance">$0.00</strong>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label for="weeklyFundAction">Operación a realizar</label>
+        <select id="weeklyFundAction" onchange="toggleWeeklyFundFields()">
+          <option value="add">Agregar / Abonar dinero al Fondo Semanal</option>
+          <option value="transfer">Transferir del Fondo Semanal a una Tarjeta</option>
+        </select>
+      </div>
+
+      <form onsubmit="processWeeklyFund(event)">
+        <div class="field-group">
+          <label for="weeklyFundAmount">Monto ($ MXN)</label>
+          <input type="number" id="weeklyFundAmount" step="0.01" min="0.01" required>
+        </div>
+
+        <div class="field-group" id="weeklyFundConceptField">
+          <label for="weeklyFundConcept">Concepto del Ingreso Semanal</label>
+          <input type="text" id="weeklyFundConcept">
+        </div>
+
+        <div class="field-group" id="weeklyFundTargetCardField" style="display:none;">
+          <label for="weeklyFundTargetCard">Tarjeta Destino</label>
+          <select id="weeklyFundTargetCard"></select>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" onclick="closeModal('weeklyFundModal')">Cancelar</button>
+          <button type="submit" class="btn btn-emerald" id="btnSubmitWeeklyFund">
+            <span class="material-icons-round">check_circle</span> Confirmar Operación
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Nuevo Movimiento -->
+  <div id="movModal" class="modal-backdrop" onclick="closeBackdrop(event, 'movModal')">
+    <div class="modal-card">
+      <h2 class="modal-title">Registrar Movimiento</h2>
+      <div class="callout-box">
+        <span class="material-icons-round" style="color:var(--bank-blue); font-size:18px;">info</span>
+        <span id="liveFormHint">Puedes descontar gastos directamente desde tu Fondo Semanal o desde tus tarjetas.</span>
+      </div>
+      <form onsubmit="saveMovement(event)">
+        <div class="field-group">
+          <label for="movType">Tipo de Movimiento</label>
+          <select id="movType" onchange="toggleDebtField(); analyzeLiveInput();" required>
+            <option value="Gasto">Gasto</option>
+            <option value="Ahorro">Ahorro</option>
+            <option value="Deuda">Deuda</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label for="movDesc">Concepto</label>
+          <input type="text" id="movDesc" oninput="analyzeLiveInput()" required>
+        </div>
+        <div class="field-group">
+          <label for="movAmount">Monto ($ MXN)</label>
+          <input type="number" id="movAmount" oninput="analyzeLiveInput()" step="0.01" min="0.01" required>
+        </div>
+        <div class="field-group">
+          <label for="movCardId">Cuenta / Tarjeta Asociada</label>
+          <select id="movCardId"></select>
+        </div>
+        <div class="field-group" id="debtOriginField" style="display: none;">
+          <label for="movDebtDate">Fecha Original de la Deuda (Opcional)</label>
+          <input type="date" id="movDebtDate">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" onclick="closeModal('movModal')">Cancelar</button>
+          <button type="submit" class="btn">Guardar Movimiento</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Registrar Tarjeta -->
+  <div id="cardModal" class="modal-backdrop" onclick="closeBackdrop(event, 'cardModal')">
+    <div class="modal-card">
+      <h2 class="modal-title">Agregar Nueva Tarjeta</h2>
+      <form onsubmit="saveCard(event)">
+        <div class="field-group">
+          <label for="cardType">Tipo de Tarjeta</label>
+          <select id="cardType" onchange="toggleCreditFields()">
+            <option value="Débito">Débito (Saldo disponible)</option>
+            <option value="Crédito">Crédito (Saldo utilizado / deuda)</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label for="cardName">Institución / Alias de la Tarjeta</label>
+          <input type="text" id="cardName" required>
+        </div>
+        <div class="field-group">
+          <label id="cardBalanceLabel" for="cardBalance">Saldo Disponible ($ MXN)</label>
+          <input type="number" id="cardBalance" step="0.01" min="0" required>
+        </div>
+        <div id="creditOnlyFields" style="display: none;">
+          <div class="field-row">
+            <div class="field-group">
+              <label for="cardCutDate">Fecha de Corte</label>
+              <input type="date" id="cardCutDate" onchange="autoCalculatePayDate()">
+            </div>
+            <div class="field-group">
+              <label for="cardPayDate">Fecha Límite de Pago</label>
+              <input type="date" id="cardPayDate">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" onclick="closeModal('cardModal')">Cancelar</button>
+          <button type="submit" class="btn">Guardar Tarjeta</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Actualizar Deuda de Tarjeta de Crédito -->
+  <div id="updateDebtModal" class="modal-backdrop" onclick="closeBackdrop(event, 'updateDebtModal')">
+    <div class="modal-card">
+      <h2 class="modal-title">Actualizar Deuda de Tarjeta</h2>
+      <div class="callout-box">
+        <span class="material-icons-round" style="color:var(--amber); font-size:20px;">edit_note</span>
+        <span id="updateDebtSummaryText">Ajusta manualmente el saldo actual utilizado en esta tarjeta.</span>
+      </div>
+      <form onsubmit="saveUpdatedCardDebt(event)">
+        <input type="hidden" id="updateDebtCardId">
+        <div class="field-group">
+          <label for="updateDebtAmount">Nuevo Saldo / Deuda Actual ($ MXN)</label>
+          <input type="number" id="updateDebtAmount" step="0.01" min="0" required>
+        </div>
+        <div class="field-group">
+          <label for="updateDebtReason">Motivo de Actualización (Opcional)</label>
+          <input type="text" id="updateDebtReason">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" onclick="closeModal('updateDebtModal')">Cancelar</button>
+          <button type="submit" class="btn btn-amber">
+            <span class="material-icons-round">save</span> Actualizar Deuda
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Pagar / Liquidar Tarjeta -->
+  <div id="payCardModal" class="modal-backdrop" onclick="closeBackdrop(event, 'payCardModal')">
+    <div class="modal-card">
+      <h2 class="modal-title">Liquidar / Abonar Deuda de Tarjeta</h2>
+      <div class="callout-box">
+        <span class="material-icons-round" style="color:var(--emerald); font-size:18px;">payments</span>
+        <span id="payCardSummaryText">Selecciona el monto y medio de pago para abonar a tu tarjeta.</span>
+      </div>
+      <form onsubmit="processCardPayment(event)">
+        <input type="hidden" id="payTargetCardId">
+        <div class="field-group">
+          <label for="payAmount">Monto a Pagar ($ MXN)</label>
+          <input type="number" id="payAmount" step="0.01" min="0.01" required>
+        </div>
+        <div class="field-group">
+          <label for="payMethodType">Método de Pago</label>
+          <select id="payMethodType" onchange="togglePaySourceCard()" required>
+            <option value="FondoSemanal">Fondo Semanal Disponible</option>
+            <option value="Tienda">Pago en Tienda / OXXO / Efectivo</option>
+            <option value="Tarjeta">Transferencia / Tarjeta de Débito</option>
+          </select>
+        </div>
+        <div class="field-group" id="payDebitSourceField" style="display: none;">
+          <label for="paySourceDebitId">Tarjeta de Débito Origen</label>
+          <select id="paySourceDebitId"></select>
+        </div>
+        <div class="field-group">
+          <label>Comprobante de Pago (Opcional)</label>
+          <div class="upload-dropzone" onclick="document.getElementById('payReceiptFile').click()">
+            <span class="material-icons-round" style="color:var(--bank-blue); font-size:28px;">attach_file</span>
+            <div id="payReceiptFileName" style="font-size:0.84rem; margin-top:4px; color:var(--text-muted);">
+              Haz clic para adjuntar comprobante o recibo (Imagen o PDF)
+            </div>
+          </div>
+          <input type="file" id="payReceiptFile" accept="image/*,application/pdf" style="display:none;" onchange="handleReceiptUpload(event)">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" onclick="closeModal('payCardModal')">Cancelar</button>
+          <button type="submit" class="btn btn-emerald">
+            <span class="material-icons-round">check_circle</span> Confirmar Pago
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Visor de Comprobante -->
+  <div id="receiptViewerModal" class="modal-backdrop" onclick="closeBackdrop(event, 'receiptViewerModal')">
+    <div class="modal-card wide">
+      <div class="panel-header" style="margin-bottom: 12px;">
+        <h2 class="modal-title" id="receiptViewerTitle" style="margin: 0;">Comprobante de Pago</h2>
+        <button class="btn-icon" onclick="closeModal('receiptViewerModal')">
+          <span class="material-icons-round">close</span>
+        </button>
+      </div>
+      <div id="receiptViewerContainer" style="text-align:center; max-height:65vh; overflow:auto;"></div>
+    </div>
+  </div>
+
+  <!-- Modal: Vista Previa Constancia PDF -->
+  <div id="pdfPreviewModal" class="modal-backdrop" onclick="closeBackdrop(event, 'pdfPreviewModal')">
+    <div class="modal-card wide">
+      <div class="panel-header" style="margin-bottom: 12px;">
+        <h2 class="modal-title" style="margin: 0;">Constancia Oficial SIADFI</h2>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn btn-soft" onclick="printCurrentPreview()">
+            <span class="material-icons-round">print</span> Imprimir
+          </button>
+          <button class="btn" onclick="downloadCurrentPreview()">
+            <span class="material-icons-round">download</span> Descargar PDF
+          </button>
+          <button class="btn-icon" onclick="closeModal('pdfPreviewModal')">
+            <span class="material-icons-round">close</span>
+          </button>
+        </div>
+      </div>
+      <iframe id="pdfIframe" style="width: 100%; height: 65vh; border: 1px solid var(--border-light); border-radius: 14px;"></iframe>
+    </div>
+  </div>
+
+  <script id="siadfiCoreScript">
+    const APP_VERSION = "1.0.0";
+    const STORAGE_KEY = 'siadfiStateV2';
+    const OTA_PATCH_KEY = 'siadfi_ota_patch';
+    const OTA_MANIFEST_URL = 'https://kayrox.qzz.io/siadfiota.json';
+
+    let rawSavedData = null;
+    let bootStorageError = null;
+
+    try {
+      rawSavedData = localStorage.getItem(STORAGE_KEY);
+    } catch (storageErr) {
+      bootStorageError = 'No se pudo acceder al almacenamiento local del navegador: ' + storageErr.message;
+    }
+
+    const hasExistingData = Boolean(rawSavedData);
+
+    function createEmptyState() {
+      return {
+        userName: '',
+        debtThreshold: 5000,
+        weeklyFundBalance: 0,
+        appearance: {
+          theme: 'light',
+          accent: 'blue',
+          density: 'comfortable'
+        },
+        profile: {
+          firstName: '',
+          lastNameP: '',
+          lastNameM: '',
+          birthDate: '',
+          rfc: '',
+          curp: '',
+          stateName: '',
+          cp: '',
+          municipio: '',
+          colonia: '',
+          calle: '',
+          numExt: '',
+          numInt: ''
+        },
+        movements: [],
+        cards: [],
+        certificates: [],
+        lastAutoCertWeek: '',
+        updatedAt: 0
+      };
+    }
+
+    let state = createEmptyState();
+    if (hasExistingData && !bootStorageError) {
+      try {
+        const parsed = JSON.parse(rawSavedData);
+        if (!parsed || typeof parsed !== 'object') {
+          throw new Error('Estructura de datos dañada o inválida.');
+        }
+        state = Object.assign(createEmptyState(), parsed);
+        state.profile = Object.assign(createEmptyState().profile, parsed.profile || {});
+        state.appearance = Object.assign(createEmptyState().appearance, parsed.appearance || {});
+      } catch (parseErr) {
+        bootStorageError = 'Error al leer los datos guardados en el arranque: ' + parseErr.message;
+      }
+    }
+
+    if (typeof state.weeklyFundBalance !== 'number') state.weeklyFundBalance = 0;
+
+    let chartObj = null;
+    let activePreviewCert = null;
+    let pendingReceiptData = null;
+
+    function applyAppearanceSettings(appCfg = state.appearance) {
+      const cfg = appCfg || { theme: 'light', accent: 'blue', density: 'comfortable' };
+      document.body.classList.toggle('theme-dark', cfg.theme === 'dark');
+      document.body.classList.remove('accent-emerald', 'accent-indigo', 'accent-slate');
+      if (cfg.accent && cfg.accent !== 'blue') {
+        document.body.classList.add('accent-' + cfg.accent);
+      }
+      document.body.classList.toggle('density-compact', cfg.density === 'compact');
+    }
+
+    function buildFullName(p) {
+      if (p && (p.firstName || p.lastNameP || p.lastNameM)) {
+        return [p.firstName, p.lastNameP, p.lastNameM].filter(Boolean).join(' ').trim();
+      }
+      return state.userName || 'Titular Financiero';
+    }
+
+    function buildFullAddress(p) {
+      if (!p) return '';
+      if (p.calle || p.colonia || p.municipio || p.stateName) {
+        const streetPart = [
+          p.calle,
+          p.numExt ? `Ext. ${p.numExt}` : '',
+          p.numInt ? `Int. ${p.numInt}` : ''
+        ].filter(Boolean).join(' ');
+        return [
+          streetPart,
+          p.colonia ? `Col. ${p.colonia}` : '',
+          p.municipio,
+          p.stateName,
+          p.cp ? `CP ${p.cp}` : ''
+        ].filter(Boolean).join(', ');
+      }
+      return [p.address, p.municipio, p.stateName, p.cp ? `CP ${p.cp}` : ''].filter(Boolean).join(', ');
+    }
+
+    function persist() {
+      state.updatedAt = Date.now();
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (err) {
+        console.warn('LocalStorage lleno:', err);
+      }
+      renderAll();
+    }
+
+    // =========================================================================
+    // SISTEMA OTA (OVER-THE-AIR)
+    // =========================================================================
+    function compareSemver(remoteVer, localVer) {
+      const cleanRemote = String(remoteVer || '').trim().replace(/^v/i, '');
+      const cleanLocal = String(localVer || '').trim().replace(/^v/i, '');
+      const rParts = cleanRemote.split('.').map(n => parseInt(n, 10) || 0);
+      const lParts = cleanLocal.split('.').map(n => parseInt(n, 10) || 0);
+      const len = Math.max(rParts.length, lParts.length);
+      for (let i = 0; i < len; i++) {
+        const rv = rParts[i] || 0;
+        const lv = lParts[i] || 0;
+        if (rv > lv) return 1;
+        if (rv < lv) return -1;
+      }
+      return 0;
+    }
+
+    function setOtaStatusBox(messageHtml, variant = 'normal') {
+      const box = document.getElementById('otaStatusMessageBox');
+      if (!box) return;
+      box.className = 'ota-status-box' + (variant === 'success' ? ' success' : (variant === 'error' ? ' error' : ''));
+      box.innerHTML = messageHtml;
+    }
+
+    function refreshOtaVersionLabels() {
+      const installedBadge = document.getElementById('otaInstalledVersionBadge');
+      const currentVersionText = document.getElementById('otaCurrentVersionText');
+      const infoVersionText = document.getElementById('infoSystemVersionText');
+      const patchStatus = document.getElementById('otaLocalPatchStatus');
+
+      if (installedBadge) installedBadge.innerText = `Versión instalada: ${APP_VERSION}`;
+      if (currentVersionText) currentVersionText.innerText = APP_VERSION;
+      if (infoVersionText) infoVersionText.innerText = APP_VERSION;
+
+      let storedPatch = null;
+      try {
+        const rawPatch = localStorage.getItem(OTA_PATCH_KEY);
+        if (rawPatch) storedPatch = JSON.parse(rawPatch);
+      } catch (e) {
+        storedPatch = null;
+      }
+
+      if (patchStatus) {
+        if (storedPatch && storedPatch.version) {
+          patchStatus.innerText = `Parche v${storedPatch.version} guardado`;
+          patchStatus.style.color = 'var(--emerald)';
+        } else {
+          patchStatus.innerText = 'Sin parche OTA aplicado';
+          patchStatus.style.color = 'var(--text-muted)';
+        }
+      }
+    }
+
+    async function checkForOtaUpdates() {
+      const btnCheck = document.getElementById('btnCheckOtaUpdates');
+      const btnRestart = document.getElementById('btnRestartProgramOta');
+      const progressSec = document.getElementById('otaProgressSection');
+
+      if (btnRestart) btnRestart.style.display = 'none';
+      if (progressSec) progressSec.style.display = 'none';
+      if (btnCheck) btnCheck.disabled = true;
+
+      setOtaStatusBox('<span class="material-icons-round" style="vertical-align:middle; font-size:18px; color:var(--bank-blue);">sync</span> Consultando manifiesto remoto en <strong>kayrox.qzz.io</strong>...');
+
+      try {
+        const response = await fetch(OTA_MANIFEST_URL, {
+          method: 'GET',
+          cache: 'no-store'
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error HTTP ${response.status} al consultar ${OTA_MANIFEST_URL}`);
+        }
+
+        const manifest = await response.json();
+        if (!manifest || typeof manifest.version !== 'string' || typeof manifest.url !== 'string' || !manifest.url.trim()) {
+          throw new Error('El JSON remoto no contiene los campos válidos "version" y "url".');
+        }
+
+        const remoteVersion = manifest.version.trim();
+        const downloadUrl = manifest.url.trim();
+        const cmp = compareSemver(remoteVersion, APP_VERSION);
+
+        if (cmp <= 0) {
+          setOtaStatusBox(
+            `<strong>El sistema está actualizado.</strong> Versión instalada: <strong>${escapeHtml(APP_VERSION)}</strong> • Versión remota: <strong>${escapeHtml(remoteVersion)}</strong>.`,
+            'success'
+          );
+          if (btnCheck) btnCheck.disabled = false;
+          return;
+        }
+
+        setOtaStatusBox(
+          `Nueva versión disponible: <strong>${escapeHtml(remoteVersion)}</strong> (actual: <strong>${escapeHtml(APP_VERSION)}</strong>). Iniciando descarga desde <strong>${escapeHtml(downloadUrl)}</strong>...`
+        );
+
+        const downloadedPayload = await downloadUpdateWithProgress(downloadUrl, remoteVersion);
+        await applyLiveUpdatePatch(downloadedPayload, remoteVersion, downloadUrl);
+
+        if (progressSec) progressSec.style.display = 'none';
+        if (btnRestart) btnRestart.style.display = 'inline-flex';
+        if (btnCheck) btnCheck.disabled = false;
+        refreshOtaVersionLabels();
+
+        setOtaStatusBox(
+          `<strong>Actualización v${escapeHtml(remoteVersion)} aplicada en vivo y guardada en LocalStorage.</strong> Tus datos locales se conservaron intactos. Haz clic en <strong>Reiniciar Programa</strong> para refrescar la aplicación.`,
+          'success'
+        );
+      } catch (err) {
+        if (progressSec) progressSec.style.display = 'none';
+        if (btnCheck) btnCheck.disabled = false;
+        const detail = err && err.message ? err.message : 'Error de red o CORS al conectar con kayrox.qzz.io.';
+        setOtaStatusBox(
+          `<strong>No se pudo completar la verificación o descarga OTA:</strong> ${escapeHtml(detail)}`,
+          'error'
+        );
+      }
+    }
+
+    async function downloadUpdateWithProgress(url, remoteVersion) {
+      const progressSec = document.getElementById('otaProgressSection');
+      const stageLabel = document.getElementById('otaDownloadStageLabel');
+      const percentLabel = document.getElementById('otaProgressPercent');
+      const barFill = document.getElementById('otaProgressBarFill');
+      const bytesLabel = document.getElementById('otaDownloadBytesLabel');
+
+      if (progressSec) progressSec.style.display = 'block';
+      if (stageLabel) stageLabel.innerText = `Descargando actualización v${remoteVersion}...`;
+      if (percentLabel) percentLabel.innerText = '0%';
+      if (barFill) barFill.style.width = '0%';
+      if (bytesLabel) bytesLabel.innerText = '0 bytes / Calculando tamaño...';
+
+      const res = await fetch(url, {
+        method: 'GET',
+        cache: 'no-store'
+      });
+
+      if (!res.ok) {
+        throw new Error(`Error HTTP ${res.status} al descargar el paquete desde ${url}`);
+      }
+
+      const contentLengthHeader = res.headers.get('content-length');
+      const totalBytes = contentLengthHeader ? parseInt(contentLengthHeader, 10) : 0;
+
+      if (!res.body || typeof res.body.getReader !== 'function') {
+        const fallbackText = await res.text();
+        if (percentLabel) percentLabel.innerText = '100%';
+        if (barFill) barFill.style.width = '100%';
+        if (bytesLabel) bytesLabel.innerText = `${fallbackText.length} bytes descargados`;
+        return fallbackText;
+      }
+
+      const reader = res.body.getReader();
+      const chunks = [];
+      let receivedBytes = 0;
+
+      while (true) {
+        const readResult = await reader.read();
+        if (readResult.done) break;
+        const chunk = readResult.value;
+        chunks.push(chunk);
+        receivedBytes += chunk.length;
+
+        if (totalBytes > 0) {
+          const pct = Math.min(100, Math.round((receivedBytes / totalBytes) * 100));
+          if (percentLabel) percentLabel.innerText = `${pct}%`;
+          if (barFill) barFill.style.width = `${pct}%`;
+          if (bytesLabel) bytesLabel.innerText = `${receivedBytes.toLocaleString('es-MX')} / ${totalBytes.toLocaleString('es-MX')} bytes`;
+        } else {
+          if (percentLabel) percentLabel.innerText = 'Descargando...';
+          if (barFill) barFill.style.width = '65%';
+          if (bytesLabel) bytesLabel.innerText = `${receivedBytes.toLocaleString('es-MX')} bytes recibidos`;
+        }
+      }
+
+      if (percentLabel) percentLabel.innerText = '100%';
+      if (barFill) barFill.style.width = '100%';
+      if (bytesLabel) {
+        bytesLabel.innerText = totalBytes > 0
+          ? `${receivedBytes.toLocaleString('es-MX')} / ${totalBytes.toLocaleString('es-MX')} bytes (100%)`
+          : `${receivedBytes.toLocaleString('es-MX')} bytes descargados`;
+      }
+
+      const combined = new Uint8Array(receivedBytes);
+      let offset = 0;
+      for (let i = 0; i < chunks.length; i++) {
+        combined.set(chunks[i], offset);
+        offset += chunks[i].length;
+      }
+
+      const decoder = new TextDecoder('utf-8');
+      return decoder.decode(combined);
+    }
+
+    function parseOtaPackage(rawText) {
+      const trimmed = String(rawText || '').trim();
+      if (!trimmed) {
+        throw new Error('El paquete descargado está vacío.');
+      }
+
+      // Soporta un JSON con { css, js, html } o código JS/HTML directo
+      if (trimmed.startsWith('{')) {
+        try {
+          const jsonPkg = JSON.parse(trimmed);
+          if (jsonPkg && (typeof jsonPkg.js === 'string' || typeof jsonPkg.css === 'string' || typeof jsonPkg.html === 'string')) {
+            return {
+              css: jsonPkg.css || '',
+              js: jsonPkg.js || '',
+              html: jsonPkg.html || '',
+              raw: trimmed
+            };
+          }
+        } catch (e) {
+          // Si no es JSON de parche válido, tratar como script/texto
+        }
+      }
+
+      return {
+        css: '',
+        js: trimmed,
+        html: '',
+        raw: trimmed
+      };
+    }
+
+    function injectOtaStyles(cssCode) {
+      if (!cssCode || !cssCode.trim()) return;
+      let patchStyleEl = document.getElementById('siadfiOtaDynamicStyle');
+      if (!patchStyleEl) {
+        patchStyleEl = document.createElement('style');
+        patchStyleEl.id = 'siadfiOtaDynamicStyle';
+        document.head.appendChild(patchStyleEl);
+      }
+      if (patchStyleEl.textContent !== cssCode) {
+        patchStyleEl.textContent = cssCode;
+      }
+    }
+
+    function injectOtaHtmlFragment(htmlFragment) {
+      if (!htmlFragment || !htmlFragment.trim()) return;
+      let patchContainer = document.getElementById('siadfiOtaDynamicHtml');
+      if (!patchContainer) {
+        patchContainer = document.createElement('div');
+        patchContainer.id = 'siadfiOtaDynamicHtml';
+        document.body.appendChild(patchContainer);
+      }
+      if (patchContainer.innerHTML !== htmlFragment) {
+        patchContainer.innerHTML = htmlFragment;
+      }
+    }
+
+    function executeOtaScript(jsCode) {
+      if (!jsCode || !jsCode.trim()) return;
+      const currentCoreEl = document.getElementById('siadfiCoreScript');
+      const currentCode = currentCoreEl ? currentCoreEl.textContent : '';
+      if (currentCode === jsCode) return;
+
+      // eslint-disable-next-line no-new-func
+      const runner = new Function(jsCode);
+      runner();
+    }
+
+    async function applyLiveUpdatePatch(rawPayload, remoteVersion, sourceUrl, persistToStorage = true) {
+      const pkg = parseOtaPackage(rawPayload);
+
+      if (pkg.css) {
+        injectOtaStyles(pkg.css);
+      }
+      if (pkg.html) {
+        injectOtaHtmlFragment(pkg.html);
+      }
+      if (pkg.js) {
+        executeOtaScript(pkg.js);
+      }
+
+      if (persistToStorage) {
+        const patchRecord = {
+          version: remoteVersion,
+          url: sourceUrl,
+          installedAt: new Date().toISOString(),
+          css: pkg.css,
+          js: pkg.js,
+          html: pkg.html,
+          raw: pkg.raw
+        };
+        localStorage.setItem(OTA_PATCH_KEY, JSON.stringify(patchRecord));
+      }
+
+      if (typeof renderAll === 'function') {
+        renderAll();
+      }
+    }
+
+    function bootStoredOtaPatchIfAny() {
+      try {
+        const rawPatch = localStorage.getItem(OTA_PATCH_KEY);
+        if (!rawPatch) return false;
+        const patchRecord = JSON.parse(rawPatch);
+        if (!patchRecord || !patchRecord.version) return false;
+
+        const cmp = compareSemver(patchRecord.version, APP_VERSION);
+        if (cmp > 0) {
+          applyLiveUpdatePatch(
+            patchRecord.raw || JSON.stringify({
+              css: patchRecord.css || '',
+              js: patchRecord.js || '',
+              html: patchRecord.html || ''
+            }),
+            patchRecord.version,
+            patchRecord.url || OTA_MANIFEST_URL,
+            false
+          );
+          return true;
+        }
+      } catch (err) {
+        console.warn('No se pudo cargar el parche OTA almacenado:', err);
+      }
+      return false;
+    }
+
+    function restartProgramOta() {
+      location.reload();
+    }
+
+    // --- FLUJO DE ARRANQUE Y CONFIGURACIÓN INICIAL ---
+    function startAppBootSequence() {
+      if (window.__SIADFI_BOOT_FATAL__) {
+        showStartupError(window.__SIADFI_BOOT_FATAL__);
+        return;
+      }
+      if (bootStorageError) {
+        showStartupError(bootStorageError);
+        return;
+      }
+
+      try {
+        applyAppearanceSettings();
+        bootStoredOtaPatchIfAny();
+        refreshOtaVersionLabels();
+
+        const splash = document.getElementById('splashScreen');
+        const onboarding = document.getElementById('onboardingScreen');
+        const mainApp = document.getElementById('mainAppWrapper');
+
+        if (!hasExistingData) {
+          splash.style.display = 'flex';
+          setTimeout(() => {
+            try {
+              splash.style.display = 'none';
+              onboarding.style.display = 'flex';
+              goToOnboardingStep(1);
+            } catch (e) {
+              showStartupError(e.message);
+            }
+          }, 20000);
+        } else {
+          splash.style.display = 'flex';
+          setTimeout(() => {
+            try {
+              splash.style.display = 'none';
+              mainApp.style.display = 'block';
+              syncCreditCardCycles();
+              renderAll();
+              checkWeekendAutoCertificate();
+            } catch (e) {
+              showStartupError(e.message);
+            }
+          }, 5000);
+        }
+      } catch (err) {
+        showStartupError(err.message);
+      }
+    }
+
+    function goToOnboardingStep(step) {
+      document.getElementById('onbStep1').style.display = step === 1 ? 'block' : 'none';
+      document.getElementById('onbStep2').style.display = step === 2 ? 'block' : 'none';
+      document.getElementById('onbStep3').style.display = step === 3 ? 'block' : 'none';
+
+      document.getElementById('dotStep1').className = 'step-dot ' + (step === 1 ? 'active' : 'done');
+      document.getElementById('dotStep2').className = 'step-dot ' + (step === 2 ? 'active' : (step > 2 ? 'done' : ''));
+      document.getElementById('dotStep3').className = 'step-dot ' + (step === 3 ? 'active' : '');
+    }
+
+    function submitOnboardingData(e) {
+      e.preventDefault();
+      state.profile = {
+        firstName: document.getElementById('onbFirstName').value.trim(),
+        lastNameP: document.getElementById('onbLastNameP').value.trim(),
+        lastNameM: document.getElementById('onbLastNameM').value.trim(),
+        birthDate: document.getElementById('onbBirthDate').value,
+        rfc: document.getElementById('onbRfc').value.trim().toUpperCase(),
+        curp: document.getElementById('onbCurp').value.trim().toUpperCase(),
+        stateName: document.getElementById('onbState').value.trim(),
+        cp: document.getElementById('onbCp').value.trim(),
+        municipio: document.getElementById('onbMunicipio').value.trim(),
+        colonia: document.getElementById('onbColonia').value.trim(),
+        calle: document.getElementById('onbCalle').value.trim(),
+        numExt: document.getElementById('onbNumExt').value.trim(),
+        numInt: document.getElementById('onbNumInt').value.trim()
+      };
+      state.userName = buildFullName(state.profile);
+      goToOnboardingStep(3);
+    }
+
+    function toggleFinishOnboardingBtn() {
+      document.getElementById('btnFinishOnboarding').disabled = !document.getElementById('acceptTermsCheck').checked;
+    }
+
+    function completeInitialSetup() {
+      if (!document.getElementById('acceptTermsCheck').checked) return;
+
+      state.updatedAt = Date.now();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+
+      document.getElementById('onboardingScreen').style.display = 'none';
+      const splash = document.getElementById('splashScreen');
+      document.getElementById('splashSpinnerMode').style.display = 'none';
+      document.getElementById('splashEraseMode').style.display = 'none';
+      document.getElementById('splashErrorMode').style.display = 'none';
+      document.getElementById('splashFirstSetupMode').style.display = 'block';
+      splash.style.display = 'flex';
+
+      const bar = document.getElementById('setupProgressBar');
+      let elapsed = 0;
+      const totalMs = 60000;
+      const interval = setInterval(() => {
+        elapsed += 500;
+        const pct = Math.min(100, (elapsed / totalMs) * 100);
+        bar.style.width = `${pct}%`;
+        if (elapsed >= totalMs) {
+          clearInterval(interval);
+          splash.style.display = 'none';
+          document.getElementById('mainAppWrapper').style.display = 'block';
+          syncCreditCardCycles();
+          renderAll();
+          checkWeekendAutoCertificate();
+        }
+      }, 500);
+    }
+
+    // =========================================================================
+    // CONFIGURACIÓN COMPLETA A PANTALLA COMPLETA
+    // =========================================================================
+    function openFullSettings() {
+      const p = state.profile || {};
+      document.getElementById('cfgFirstName').value = p.firstName || state.userName || '';
+      document.getElementById('cfgLastNameP').value = p.lastNameP || '';
+      document.getElementById('cfgLastNameM').value = p.lastNameM || '';
+      document.getElementById('cfgBirthDate').value = p.birthDate || '';
+      document.getElementById('cfgRfc').value = p.rfc || '';
+      document.getElementById('cfgCurp').value = p.curp || '';
+      document.getElementById('cfgThreshold').value = state.debtThreshold;
+      document.getElementById('cfgState').value = p.stateName || '';
+      document.getElementById('cfgCp').value = p.cp || '';
+      document.getElementById('cfgMunicipio').value = p.municipio || '';
+      document.getElementById('cfgColonia').value = p.colonia || '';
+      document.getElementById('cfgCalle').value = p.calle || '';
+      document.getElementById('cfgNumExt').value = p.numExt || '';
+      document.getElementById('cfgNumInt').value = p.numInt || '';
+
+      const appCfg = state.appearance || { theme: 'light', accent: 'blue', density: 'comfortable' };
+      document.getElementById('cfgDensity').value = appCfg.density || 'comfortable';
+      updateAppearanceUIControls(appCfg);
+      refreshOtaVersionLabels();
+
+      document.getElementById('infoRecordsCount').innerText =
+        `${state.movements.length} movimientos • ${state.cards.length} tarjetas • ${state.certificates.length} constancias`;
+
+      switchSettingsPane('pane-perfil', document.querySelector('.settings-nav-btn[data-pane="pane-perfil"]'));
+      document.getElementById('fullSettingsScreen').classList.add('open');
+    }
+
+    function switchSettingsPane(paneId, btn) {
+      document.querySelectorAll('.settings-pane').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.settings-nav-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(paneId).classList.add('active');
+      if (btn) btn.classList.add('active');
+    }
+
+    function updateAppearanceUIControls(cfg) {
+      document.getElementById('themeOptLight').classList.toggle('selected', cfg.theme !== 'dark');
+      document.getElementById('themeOptDark').classList.toggle('selected', cfg.theme === 'dark');
+
+      document.querySelectorAll('.color-swatch').forEach(sw => {
+        const isSel = sw.getAttribute('data-accent') === (cfg.accent || 'blue');
+        sw.classList.toggle('selected', isSel);
+        sw.innerHTML = isSel ? '<span class="material-icons-round">check</span>' : '';
+      });
+    }
+
+    function selectAppearanceTheme(theme) {
+      state.appearance.theme = theme;
+      applyAppearanceSettings(state.appearance);
+      updateAppearanceUIControls(state.appearance);
+    }
+
+    function selectAppearanceAccent(accent) {
+      state.appearance.accent = accent;
+      applyAppearanceSettings(state.appearance);
+      updateAppearanceUIControls(state.appearance);
+    }
+
+    function previewDensityChange() {
+      state.appearance.density = document.getElementById('cfgDensity').value;
+      applyAppearanceSettings(state.appearance);
+    }
+
+    function saveAndExitFullSettings() {
+      state.debtThreshold = parseFloat(document.getElementById('cfgThreshold').value) || 5000;
+      state.appearance.density = document.getElementById('cfgDensity').value;
+      state.profile = {
+        firstName: document.getElementById('cfgFirstName').value.trim(),
+        lastNameP: document.getElementById('cfgLastNameP').value.trim(),
+        lastNameM: document.getElementById('cfgLastNameM').value.trim(),
+        birthDate: document.getElementById('cfgBirthDate').value,
+        rfc: document.getElementById('cfgRfc').value.trim().toUpperCase(),
+        curp: document.getElementById('cfgCurp').value.trim().toUpperCase(),
+        stateName: document.getElementById('cfgState').value.trim(),
+        cp: document.getElementById('cfgCp').value.trim(),
+        municipio: document.getElementById('cfgMunicipio').value.trim(),
+        colonia: document.getElementById('cfgColonia').value.trim(),
+        calle: document.getElementById('cfgCalle').value.trim(),
+        numExt: document.getElementById('cfgNumExt').value.trim(),
+        numInt: document.getElementById('cfgNumInt').value.trim()
+      };
+      state.userName = buildFullName(state.profile);
+
+      applyAppearanceSettings(state.appearance);
+      persist();
+      document.getElementById('fullSettingsScreen').classList.remove('open');
+    }
+
+    // --- COPIA DE SEGURIDAD ---
+    function exportBackupJson() {
+      const payload = {
+        app: 'SIADFI',
+        version: APP_VERSION,
+        exportedAt: new Date().toISOString(),
+        data: state
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Respaldo_SIADFI_${formatLocalIsoDate(new Date())}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function importBackupJson(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(reader.result);
+          const importedData = parsed && parsed.data ? parsed.data : parsed;
+          if (!importedData || typeof importedData !== 'object' || !Array.isArray(importedData.movements)) {
+            throw new Error('El archivo seleccionado no es una copia de seguridad válida de SIADFI.');
+          }
+          state = Object.assign(createEmptyState(), importedData);
+          state.profile = Object.assign(createEmptyState().profile, importedData.profile || {});
+          state.appearance = Object.assign(createEmptyState().appearance, importedData.appearance || {});
+          applyAppearanceSettings(state.appearance);
+          persist();
+          openFullSettings();
+          document.getElementById('backupStatusText').innerText = `Copia de seguridad "${file.name}" restaurada correctamente.`;
+        } catch (err) {
+          alert('No se pudo restaurar el respaldo: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // --- BORRAR DATOS Y RESTABLECER ---
+    function resetAndEraseAllData() {
+      if (!confirm('¿Estás seguro de que deseas borrar todos los datos y restablecer SIADFI? Esta acción no se puede deshacer.')) {
+        return;
+      }
+
+      document.getElementById('fullSettingsScreen').classList.remove('open');
+      document.getElementById('mainAppWrapper').style.display = 'none';
+
+      const splash = document.getElementById('splashScreen');
+      document.getElementById('splashSpinnerMode').style.display = 'none';
+      document.getElementById('splashFirstSetupMode').style.display = 'none';
+      document.getElementById('splashErrorMode').style.display = 'none';
+      document.getElementById('splashEraseMode').style.display = 'block';
+      splash.style.display = 'flex';
+
+      const bar = document.getElementById('eraseProgressBar');
+      let progress = 0;
+      const timer = setInterval(() => {
+        progress += 5;
+        bar.style.width = `${Math.min(100, progress)}%`;
+        if (progress >= 100) {
+          clearInterval(timer);
+          localStorage.removeItem(STORAGE_KEY);
+          localStorage.removeItem(OTA_PATCH_KEY);
+          location.reload();
+        }
+      }, 250);
+    }
+
+    // --- UTILIDADES DE FECHA Y TEXTO ---
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text || '';
+      return div.innerHTML;
+    }
+
+    function getInitials(name) {
+      return (name || 'TF')
+        .trim()
+        .split(/\s+/)
+        .slice(0, 2)
+        .map(w => w[0]?.toUpperCase() || '')
+        .join('') || 'TF';
+    }
+
+    function formatLocalIsoDate(dateObj = new Date()) {
+      const y = dateObj.getFullYear();
+      const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const d = String(dateObj.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function parseLocalDate(isoStr) {
+      if (!isoStr) return null;
+      const [y, m, d] = isoStr.split('-').map(Number);
+      return new Date(y, m - 1, d);
+    }
+
+    function addDaysToIso(isoStr, days) {
+      const dt = parseLocalDate(isoStr);
+      if (!dt) return '';
+      dt.setDate(dt.getDate() + days);
+      return formatLocalIsoDate(dt);
+    }
+
+    function addMonthsClamped(isoStr, months = 1) {
+      const dt = parseLocalDate(isoStr);
+      if (!dt) return '';
+      const targetMonth = dt.getMonth() + months;
+      const year = dt.getFullYear() + Math.floor(targetMonth / 12);
+      const month = ((targetMonth % 12) + 12) % 12;
+      const maxDay = new Date(year, month + 1, 0).getDate();
+      const day = Math.min(dt.getDate(), maxDay);
+      return formatLocalIsoDate(new Date(year, month, day));
+    }
+
+    function formatPrettyDate(isoStr) {
+      const dt = parseLocalDate(isoStr);
+      if (!dt) return 'N/A';
+      return dt.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
+    // --- DETECCIÓN DE DEUDA IMPAGABLE ---
+    function isDebtUnpayable(deudasTotales, liquidezTotal, ahorros) {
+      const respaldo = Math.max(0, liquidezTotal) + Math.max(0, ahorros);
+      if (deudasTotales <= 0) return false;
+      const ratioCritical = respaldo === 0 ? deudasTotales >= state.debtThreshold : (deudasTotales / respaldo) >= 2.5;
+      return ratioCritical || (deudasTotales >= state.debtThreshold * 2 && respaldo < deudasTotales * 0.4);
+    }
+
+    function goToCardsToPay() {
+      const cardsBtn = document.querySelector('.nav-pill[data-tab="sec-tarjetas"]');
+      switchTab('sec-tarjetas', cardsBtn);
+    }
+
+    // --- NAVEGACIÓN Y MODALES ---
+    function switchTab(id, btn) {
+      const snap = getCurrentSnapshot();
+      const locked = isDebtUnpayable(snap.deudasTotales, snap.liquidezTotal, snap.ahorros);
+      if (locked && id !== 'sec-tarjetas') {
+        alert('Sección bloqueada por deuda impagable. Liquida o abona a tus deudas en "Mis Tarjetas".');
+        return;
+      }
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.nav-pill').forEach(b => b.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      if (btn) btn.classList.add('active');
+    }
+
+    function openModal(id) {
+      const snap = getCurrentSnapshot();
+      const locked = isDebtUnpayable(snap.deudasTotales, snap.liquidezTotal, snap.ahorros);
+      if (id === 'movModal' && locked) {
+        alert('Bloqueado: No puedes registrar más gastos hasta abonar o liquidar tus deudas.');
+        return;
+      }
+      if (id === 'weeklyFundModal') {
+        document.getElementById('modalWeeklyFundBalance').innerText = `$${state.weeklyFundBalance.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`;
+        document.getElementById('weeklyFundAction').value = 'add';
+        document.getElementById('weeklyFundAmount').value = '';
+        document.getElementById('weeklyFundConcept').value = '';
+        const targetSel = document.getElementById('weeklyFundTargetCard');
+        targetSel.innerHTML = state.cards.length
+          ? state.cards.map(c => `<option value="${c.id}">${escapeHtml(c.name)} (${escapeHtml(c.type)} - ${c.type === 'Débito' ? 'Disponible' : 'Deuda'}: $${c.balance.toFixed(2)})</option>`).join('')
+          : '<option value="">Sin tarjetas registradas</option>';
+        toggleWeeklyFundFields();
+      }
+      if (id === 'movModal') {
+        const sel = document.getElementById('movCardId');
+        sel.innerHTML =
+          `<option value="WEEKLY_FUND">Fondo Semanal (Disponible: $${state.weeklyFundBalance.toFixed(2)})</option>` +
+          `<option value="">Efectivo / Sin tarjeta</option>` +
+          state.cards.map(c => `<option value="${c.id}">${escapeHtml(c.name)} (${escapeHtml(c.type)}: $${c.balance.toFixed(2)})</option>`).join('');
+        toggleDebtField();
+        analyzeLiveInput();
+      }
+      if (id === 'cardModal') {
+        toggleCreditFields();
+        const todayIso = formatLocalIsoDate(new Date());
+        document.getElementById('cardCutDate').value = todayIso;
+        autoCalculatePayDate();
+      }
+      document.getElementById(id).classList.add('open');
+    }
+
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+    function closeBackdrop(e, id) {
+      if (e.target.id === id) closeModal(id);
+    }
+
+    function toggleWeeklyFundFields() {
+      const action = document.getElementById('weeklyFundAction').value;
+      const isTransfer = action === 'transfer';
+      document.getElementById('weeklyFundConceptField').style.display = isTransfer ? 'none' : 'flex';
+      document.getElementById('weeklyFundTargetCardField').style.display = isTransfer ? 'flex' : 'none';
+      const btn = document.getElementById('btnSubmitWeeklyFund');
+      btn.innerHTML = isTransfer
+        ? '<span class="material-icons-round">swap_horiz</span> Transferir a Tarjeta'
+        : '<span class="material-icons-round">add_circle</span> Agregar Fondos';
+    }
+
+    function toggleDebtField() {
+      document.getElementById('debtOriginField').style.display =
+        document.getElementById('movType').value === 'Deuda' ? 'flex' : 'none';
+    }
+
+    function toggleCreditFields() {
+      const isCredit = document.getElementById('cardType').value === 'Crédito';
+      document.getElementById('creditOnlyFields').style.display = isCredit ? 'block' : 'none';
+      document.getElementById('cardBalanceLabel').innerText = isCredit
+        ? 'Saldo Utilizado / Deuda Actual ($ MXN)'
+        : 'Saldo Disponible ($ MXN)';
+    }
+
+    function autoCalculatePayDate() {
+      const cutDate = document.getElementById('cardCutDate').value;
+      if (cutDate) document.getElementById('cardPayDate').value = addDaysToIso(cutDate, 20);
+    }
+
+    // --- SEMANA LUNES A DOMINGO ---
+    function getWeekInfo(baseDate = new Date()) {
+      const d = new Date(baseDate);
+      const day = d.getDay();
+      const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+      const monday = new Date(d.setDate(diff));
+      monday.setHours(0, 0, 0, 0);
+      const sunday = new Date(monday);
+      sunday.setDate(monday.getDate() + 6);
+      sunday.setHours(23, 59, 59, 999);
+      const fmt = (dt) => dt.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
+      return {
+        id: formatLocalIsoDate(monday),
+        label: `${fmt(monday)} al ${fmt(sunday)}`,
+        daysElapsed: day === 0 ? 7 : day
+      };
+    }
+
+    function syncCreditCardCycles() {
+      const now = new Date();
+      const todayIso = formatLocalIsoDate(now);
+      let updated = false;
+
+      state.cards.forEach(c => {
+        if (c.type !== 'Crédito') return;
+        if (!c.cutDate) {
+          c.cutDate = todayIso;
+          c.payDate = addDaysToIso(todayIso, 20);
+          updated = true;
+        }
+        if (!c.payDate && c.cutDate) {
+          c.payDate = addDaysToIso(c.cutDate, 20);
+          updated = true;
+        }
+        while (c.payDate && todayIso > c.payDate) {
+          c.cutDate = addMonthsClamped(c.cutDate, 1);
+          c.payDate = addDaysToIso(c.cutDate, 20);
+          updated = true;
+        }
+      });
+
+      if (updated) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      }
+    }
+
+    // --- GESTIÓN DE FONDOS SEMANALES ---
+    function processWeeklyFund(e) {
+      e.preventDefault();
+      const action = document.getElementById('weeklyFundAction').value;
+      const amount = parseFloat(document.getElementById('weeklyFundAmount').value);
+      if (isNaN(amount) || amount <= 0) return;
+
+      const week = getWeekInfo();
+
+      if (action === 'add') {
+        const concept = document.getElementById('weeklyFundConcept').value.trim() || 'Asignación de fondo semanal';
+        state.weeklyFundBalance = Number((state.weeklyFundBalance + amount).toFixed(2));
+        state.movements.push({
+          id: Date.now(),
+          weekId: week.id,
+          regDate: new Date().toLocaleDateString('es-MX'),
+          type: 'Ahorro',
+          desc: `Ingreso Fondo Semanal: ${concept}`,
+          amount,
+          cardName: 'Fondo Semanal',
+          debtOriginDate: ''
+        });
+      } else if (action === 'transfer') {
+        if (state.weeklyFundBalance < amount) {
+          alert(`Fondos semanales insuficientes. Disponible: $${state.weeklyFundBalance.toFixed(2)}`);
+          return;
+        }
+        const targetId = document.getElementById('weeklyFundTargetCard').value;
+        const card = state.cards.find(c => String(c.id) === String(targetId));
+        if (!card) {
+          alert('Selecciona una tarjeta válida para transferir.');
+          return;
+        }
+
+        state.weeklyFundBalance = Number((state.weeklyFundBalance - amount).toFixed(2));
+
+        if (card.type === 'Débito') {
+          card.balance = Number((card.balance + amount).toFixed(2));
+          state.movements.push({
+            id: Date.now(),
+            weekId: week.id,
+            regDate: new Date().toLocaleDateString('es-MX'),
+            type: 'Ahorro',
+            desc: `Transferencia de Fondo Semanal a ${card.name}`,
+            amount,
+            cardName: `Fondo Semanal → ${card.name} (Débito)`,
+            debtOriginDate: ''
+          });
+        } else {
+          card.balance = Math.max(0, Number((card.balance - amount).toFixed(2)));
+          state.movements.push({
+            id: Date.now(),
+            weekId: week.id,
+            regDate: new Date().toLocaleDateString('es-MX'),
+            type: 'Ahorro',
+            desc: `Abono desde Fondo Semanal a ${card.name}`,
+            amount,
+            cardName: `Fondo Semanal → ${card.name} (Crédito)`,
+            debtOriginDate: ''
+          });
+        }
+      }
+
+      e.target.reset();
+      closeModal('weeklyFundModal');
+      persist();
+    }
+
+    // --- MODAL PARA ACTUALIZAR DEUDA MANUALMENTE ---
+    function openUpdateDebtModal(cardId) {
+      const card = state.cards.find(c => String(c.id) === String(cardId));
+      if (!card || card.type !== 'Crédito') return;
+      document.getElementById('updateDebtCardId').value = card.id;
+      document.getElementById('updateDebtAmount').value = card.balance.toFixed(2);
+      document.getElementById('updateDebtReason').value = '';
+      document.getElementById('updateDebtSummaryText').innerText =
+        `Tarjeta "${card.name}" — Deuda registrada actualmente: $${card.balance.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`;
+      openModal('updateDebtModal');
+    }
+
+    function saveUpdatedCardDebt(e) {
+      e.preventDefault();
+      const cardId = document.getElementById('updateDebtCardId').value;
+      const card = state.cards.find(c => String(c.id) === String(cardId));
+      if (!card) return;
+
+      const newBalance = parseFloat(document.getElementById('updateDebtAmount').value);
+      const reason = document.getElementById('updateDebtReason').value.trim();
+      if (isNaN(newBalance) || newBalance < 0) return;
+
+      const prevBalance = card.balance;
+      const diff = Number((newBalance - prevBalance).toFixed(2));
+      card.balance = Number(newBalance.toFixed(2));
+
+      if (diff !== 0) {
+        const week = getWeekInfo();
+        state.movements.push({
+          id: Date.now(),
+          weekId: week.id,
+          regDate: new Date().toLocaleDateString('es-MX'),
+          type: diff > 0 ? 'Deuda' : 'Ahorro',
+          desc: `Actualización manual de deuda (${card.name})${reason ? ': ' + reason : ''}`,
+          amount: Math.abs(diff),
+          cardName: `${card.name} (Crédito)`,
+          debtOriginDate: ''
+        });
+      }
+
+      e.target.reset();
+      closeModal('updateDebtModal');
+      persist();
+    }
+
+    // --- PAGAR / LIQUIDAR TARJETA ---
+    function openPayCardModal(cardId) {
+      const card = state.cards.find(c => String(c.id) === String(cardId));
+      if (!card) return;
+
+      pendingReceiptData = null;
+      document.getElementById('payTargetCardId').value = card.id;
+      document.getElementById('payAmount').value = card.balance.toFixed(2);
+      document.getElementById('payAmount').max = card.balance.toFixed(2);
+      document.getElementById('payMethodType').value = state.weeklyFundBalance >= card.balance ? 'FondoSemanal' : 'Tienda';
+      document.getElementById('payReceiptFile').value = '';
+      document.getElementById('payReceiptFileName').innerText = 'Haz clic para adjuntar comprobante o recibo (Imagen o PDF)';
+
+      document.getElementById('payCardSummaryText').innerText =
+        `Liquidando "${card.name}" — Saldo pendiente: $${card.balance.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`;
+
+      const debitCards = state.cards.filter(c => c.type === 'Débito');
+      const debitSel = document.getElementById('paySourceDebitId');
+      debitSel.innerHTML = debitCards.length
+        ? debitCards.map(d => `<option value="${d.id}">${escapeHtml(d.name)} (Disponible: $${d.balance.toFixed(2)})</option>`).join('')
+        : '<option value="">Sin tarjetas de débito</option>';
+
+      togglePaySourceCard();
+      openModal('payCardModal');
+    }
+
+    function togglePaySourceCard() {
+      const method = document.getElementById('payMethodType').value;
+      document.getElementById('payDebitSourceField').style.display = method === 'Tarjeta' ? 'flex' : 'none';
+    }
+
+    function handleReceiptUpload(e) {
+      const file = e.target.files[0];
+      if (!file) { pendingReceiptData = null; return; }
+      if (file.size > 3 * 1024 * 1024) {
+        alert('Archivo muy pesado (máx. 3 MB).');
+        e.target.value = '';
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        pendingReceiptData = {
+          name: file.name,
+          type: file.type,
+          dataUrl: reader.result
+        };
+        document.getElementById('payReceiptFileName').innerText = `Archivo adjunto: ${file.name}`;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function processCardPayment(e) {
+      e.preventDefault();
+      const cardId = document.getElementById('payTargetCardId').value;
+      const card = state.cards.find(c => String(c.id) === String(cardId));
+      if (!card) return;
+
+      const payAmount = parseFloat(document.getElementById('payAmount').value);
+      const method = document.getElementById('payMethodType').value;
+
+      let paymentOriginLabel = 'Pago en Tienda / Efectivo';
+      if (method === 'FondoSemanal') {
+        if (state.weeklyFundBalance < payAmount) {
+          alert(`Saldo insuficiente en Fondo Semanal ($${state.weeklyFundBalance.toFixed(2)}).`);
+          return;
+        }
+        state.weeklyFundBalance = Number((state.weeklyFundBalance - payAmount).toFixed(2));
+        paymentOriginLabel = 'Fondo Semanal';
+      } else if (method === 'Tarjeta') {
+        const debitId = document.getElementById('paySourceDebitId').value;
+        const debitCard = state.cards.find(c => String(c.id) === String(debitId));
+        if (!debitCard) { alert('Selecciona una tarjeta de débito válida.'); return; }
+        if (debitCard.balance < payAmount) { alert(`Saldo insuficiente en ${debitCard.name}.`); return; }
+        debitCard.balance = Number((debitCard.balance - payAmount).toFixed(2));
+        paymentOriginLabel = `Débito: ${debitCard.name}`;
+      }
+
+      const prevBalance = card.balance;
+      card.balance = Math.max(0, Number((card.balance - payAmount).toFixed(2)));
+      if (card.balance === 0 && card.cutDate) {
+        card.cutDate = addMonthsClamped(card.cutDate, 1);
+        card.payDate = addDaysToIso(card.cutDate, 20);
+      }
+
+      const week = getWeekInfo();
+      state.movements.push({
+        id: Date.now(),
+        weekId: week.id,
+        regDate: new Date().toLocaleDateString('es-MX'),
+        type: 'Ahorro',
+        desc: `${card.balance === 0 && prevBalance > 0 ? 'Liquidación total' : 'Abono a deuda'} - ${card.name}`,
+        amount: payAmount,
+        cardName: `${paymentOriginLabel} → ${card.name}`,
+        debtOriginDate: '',
+        receipt: pendingReceiptData
+      });
+
+      pendingReceiptData = null;
+      e.target.reset();
+      closeModal('payCardModal');
+      persist();
+    }
+
+    function viewReceipt(movId) {
+      const mov = state.movements.find(m => String(m.id) === String(movId));
+      if (!mov || !mov.receipt) return;
+      document.getElementById('receiptViewerTitle').innerText = `Comprobante: ${mov.receipt.name}`;
+      const container = document.getElementById('receiptViewerContainer');
+      container.innerHTML = mov.receipt.type === 'application/pdf'
+        ? `<iframe src="${mov.receipt.dataUrl}" style="width:100%; height:62vh; border:none; border-radius:12px;"></iframe>`
+        : `<img src="${mov.receipt.dataUrl}" alt="Comprobante" style="max-width:100%; max-height:62vh; border-radius:12px;">`;
+      openModal('receiptViewerModal');
+    }
+
+    // --- CRUD MOVIMIENTOS Y TARJETAS ---
+    function addMovementInternal(type, desc, amount, cardId = '', debtDate = '') {
+      const snap = getCurrentSnapshot();
+      if (type === 'Gasto' && isDebtUnpayable(snap.deudasTotales, snap.liquidezTotal, snap.ahorros)) {
+        alert('Bloqueado: Tienes deuda impagable activa. Liquida o abona a tus deudas primero.');
+        return;
+      }
+      const week = getWeekInfo();
+      let cardName = 'Efectivo';
+
+      if (cardId === 'WEEKLY_FUND') {
+        if ((type === 'Gasto' || type === 'Deuda') && state.weeklyFundBalance < amount) {
+          alert(`Saldo insuficiente en el Fondo Semanal ($${state.weeklyFundBalance.toFixed(2)}).`);
+          return;
+        }
+        cardName = 'Fondo Semanal';
+        if (type === 'Gasto' || type === 'Deuda') {
+          state.weeklyFundBalance = Number((state.weeklyFundBalance - amount).toFixed(2));
+        } else if (type === 'Ahorro') {
+          state.weeklyFundBalance = Number((state.weeklyFundBalance + amount).toFixed(2));
+        }
+      } else if (cardId) {
+        const card = state.cards.find(c => String(c.id) === String(cardId));
+        if (card) {
+          cardName = `${card.name} (${card.type})`;
+          if (card.type === 'Débito') {
+            if ((type === 'Gasto' || type === 'Deuda') && card.balance < amount) {
+              alert(`Saldo insuficiente en ${card.name} ($${card.balance.toFixed(2)}).`);
+              return;
+            }
+            if (type === 'Gasto' || type === 'Deuda') card.balance = Number((card.balance - amount).toFixed(2));
+            if (type === 'Ahorro') card.balance = Number((card.balance + amount).toFixed(2));
+          } else {
+            if (type === 'Gasto' || type === 'Deuda') card.balance = Number((card.balance + amount).toFixed(2));
+            if (type === 'Ahorro') card.balance = Math.max(0, Number((card.balance - amount).toFixed(2)));
+          }
+        }
+      }
+
+      state.movements.push({
+        id: Date.now(),
+        weekId: week.id,
+        regDate: new Date().toLocaleDateString('es-MX'),
+        type,
+        desc,
+        amount,
+        cardName,
+        debtOriginDate: debtDate
+      });
+      persist();
+    }
+
+    function saveMovement(e) {
+      e.preventDefault();
+      addMovementInternal(
+        document.getElementById('movType').value,
+        document.getElementById('movDesc').value.trim(),
+        parseFloat(document.getElementById('movAmount').value),
+        document.getElementById('movCardId').value,
+        document.getElementById('movType').value === 'Deuda' ? document.getElementById('movDebtDate').value : ''
+      );
+      e.target.reset();
+      closeModal('movModal');
+    }
+
+    function removeMovement(id) {
+      state.movements = state.movements.filter(m => m.id !== id);
+      persist();
+    }
+
+    function saveCard(e) {
+      e.preventDefault();
+      const type = document.getElementById('cardType').value;
+      const cutDate = type === 'Crédito' ? (document.getElementById('cardCutDate').value || formatLocalIsoDate(new Date())) : null;
+      const payDate = type === 'Crédito' ? (document.getElementById('cardPayDate').value || addDaysToIso(cutDate, 20)) : null;
+
+      state.cards.push({
+        id: Date.now(),
+        type,
+        name: document.getElementById('cardName').value.trim(),
+        balance: parseFloat(document.getElementById('cardBalance').value),
+        cutDate,
+        payDate
+      });
+
+      syncCreditCardCycles();
+      e.target.reset();
+      closeModal('cardModal');
+      persist();
+    }
+
+    function removeCard(id) {
+      state.cards = state.cards.filter(c => c.id !== id);
+      persist();
+    }
+
+    // --- ESTATUS ---
+    function evaluateStatus(gastos, ahorros, deudasTotales, liquidezTotal) {
+      const tieneDeuda = deudasTotales > 0;
+      const respaldo = ahorros + liquidezTotal;
+      const esEstable = respaldo >= gastos && (respaldo > 0 || gastos === 0);
+      if (!tieneDeuda && esEstable) return { code: 'EST', color: '#10b981' };
+      if (!tieneDeuda && !esEstable) return { code: 'INST', color: '#f59e0b' };
+      if (tieneDeuda && esEstable) return { code: 'ADEST', color: '#f97316' };
+      return { code: 'ADINST', color: '#ef4444' };
+    }
+
+    function analyzeLiveInput() {
+      const type = document.getElementById('movType').value;
+      const desc = document.getElementById('movDesc').value.trim();
+      const amount = parseFloat(document.getElementById('movAmount').value) || 0;
+      const hint = document.getElementById('liveFormHint');
+
+      if (!desc && amount === 0) {
+        hint.innerText = 'Puedes descontar gastos directamente desde tu Fondo Semanal o desde tus tarjetas.';
+        return;
+      }
+      hint.innerText = `Movimiento listo para registrarse como ${type} por $${amount.toFixed(2)}.`;
+    }
+
+    // --- DIAGNÓSTICOS ---
+    function computeSummaryDiagnostics(weekMovs, gastos, ahorros, deudasTotales, liquidezTotal, weeklyFundBalance, daysElapsed, locked) {
+      const summaryInsights = [];
+      const dailyBurn = gastos / Math.max(daysElapsed, 1);
+
+      if (locked) {
+        summaryInsights.push({
+          icon: 'gpp_bad',
+          color: '#ef4444',
+          text: `DEUDA IMPAGABLE DETECTADA: Deudas ($${deudasTotales.toFixed(2)}) superan gravemente tu respaldo líquido. Se bloquearon nuevos gastos.`
+        });
+      }
+
+      summaryInsights.push({
+        icon: 'account_balance_wallet',
+        color: '#10b981',
+        text: `Fondo semanal disponible: $${weeklyFundBalance.toFixed(2)} | Liquidez total (Fondo + Débito): $${liquidezTotal.toFixed(2)}.`
+      });
+
+      summaryInsights.push({
+        icon: 'speed',
+        color: '#2563eb',
+        text: `Ritmo de gasto semanal: $${dailyBurn.toFixed(0)}/día (proyección al domingo: $${(dailyBurn * 7).toFixed(0)}).`
+      });
+
+      const movAdvice = weekMovs.length
+        ? `Tienes ${weekMovs.length} registro(s) esta semana. Gasto acumulado: $${gastos.toFixed(2)}.`
+        : 'Aún no hay movimientos registrados en esta semana.';
+
+      const cardsAdvice = state.cards.some(c => c.type === 'Crédito')
+        ? 'Usa "Actualizar Deuda" en tus tarjetas de crédito para ajustar tu saldo o "Pagar / Liquidar" para abonar.'
+        : 'Registra tus tarjetas de débito o crédito para transferir fondos semanales y controlar tus saldos.';
+
+      const pdfVerdict = `Dictamen SIADFI: Fondo Semanal $${weeklyFundBalance.toFixed(2)}, Liquidez Total $${liquidezTotal.toFixed(2)}, Gastos $${gastos.toFixed(2)}, Ahorros $${ahorros.toFixed(2)}, Deudas $${deudasTotales.toFixed(2)}.`;
+
+      return { summaryInsights, movAdvice, cardsAdvice, pdfVerdict };
+    }
+
+    // --- CONSTANCIAS PDF ---
+    function buildPdfDocument(certRecord) {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const fmtMoney = (n) => `$${Number(n || 0).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+      doc.setFillColor(10, 25, 47);
+      doc.rect(0, 0, pageWidth, 42, 'F');
+      doc.setFillColor(37, 99, 235);
+      doc.rect(0, 42, pageWidth, 2.5, 'F');
+
+      doc.setFillColor(255, 255, 255);
+      doc.roundedRect(14, 10, 12, 12, 2.5, 2.5, 'F');
+      doc.setTextColor(10, 25, 47);
+      doc.setFontSize(11);
+      doc.setFont(undefined, 'bold');
+      doc.text('SF', 20, 18, { align: 'center' });
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(15);
+      doc.setFont(undefined, 'bold');
+      doc.text('SIADFI • CONSTANCIA OFICIAL DE ESTADO FINANCIERO', 31, 16.5);
+
+      doc.setFontSize(8.5);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(203, 213, 225);
+      doc.text('Sistema de Administración de Finanzas • Dictamen Ejecutivo de Liquidez y Solvencia', 31, 22.5);
+
+      doc.setFontSize(8.5);
+      doc.setTextColor(255, 255, 255);
+      doc.text(`FOLIO: ${certRecord.folio}`, 14, 34);
+      doc.text(`EMISIÓN: ${certRecord.issuedAt}`, 82, 34);
+
+      const hex = certRecord.status.color.replace('#', '');
+      const r = parseInt(hex.slice(0, 2), 16);
+      const g = parseInt(hex.slice(2, 4), 16);
+      const b = parseInt(hex.slice(4, 6), 16);
+      doc.setFillColor(r, g, b);
+      doc.roundedRect(pageWidth - 46, 10, 32, 22, 3, 3, 'F');
+      doc.setDrawColor(255, 255, 255);
+      doc.setLineWidth(0.4);
+      doc.roundedRect(pageWidth - 46, 10, 32, 22, 3, 3, 'S');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(6.8);
+      doc.setFont(undefined, 'bold');
+      doc.text('ESTATUS', pageWidth - 30, 16, { align: 'center' });
+      doc.setFontSize(13);
+      doc.text(certRecord.status.code, pageWidth - 30, 25.5, { align: 'center' });
+
+      let curY = 51;
+      doc.setFillColor(248, 250, 252);
+      doc.setDrawColor(226, 232, 240);
+      doc.setLineWidth(0.35);
+      doc.roundedRect(14, curY, pageWidth - 28, 34, 3, 3, 'FD');
+
+      doc.setTextColor(10, 25, 47);
+      doc.setFontSize(9.5);
+      doc.setFont(undefined, 'bold');
+      doc.text('DATOS DEL TITULAR Y PERIODO EVALUADO', 18, curY + 7);
+
+      doc.setTextColor(30, 41, 59);
+      doc.setFontSize(8.5);
+      doc.setFont(undefined, 'normal');
+      const p = certRecord.profile || {};
+      const fullName = buildFullName(p) || certRecord.userName;
+      doc.text(`Titular: ${fullName}`, 18, curY + 13.5);
+      doc.text(`CURP: ${p.curp || 'No registrado'}   |   RFC: ${p.rfc || 'No registrado'}`, 18, curY + 19);
+      doc.text(`Fecha de Nacimiento: ${p.birthDate ? formatPrettyDate(p.birthDate) : 'No registrada'}`, 18, curY + 24.5);
+      const fullAddr = buildFullAddress(p);
+      doc.text(`Domicilio: ${fullAddr || 'No registrado'}`, 18, curY + 30, { maxWidth: pageWidth - 102 });
+
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(37, 99, 235);
+      doc.text('PERIODO SEMANAL:', pageWidth - 78, curY + 13.5);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(30, 41, 59);
+      doc.text(certRecord.periodLabel, pageWidth - 78, curY + 19);
+
+      curY += 40;
+      const kpiW = (pageWidth - 28 - 9) / 4;
+      const kpis = [
+        { label: 'FONDO SEMANAL', val: fmtMoney(certRecord.weeklyFundBalance), accent: [37, 99, 235] },
+        { label: 'LIQUIDEZ TOTAL', val: fmtMoney(certRecord.liquidezTotal), accent: [10, 25, 47] },
+        { label: 'GASTOS SEMANA', val: fmtMoney(certRecord.gastos), accent: [239, 68, 68] },
+        { label: 'DEUDAS CRÉDITO', val: fmtMoney(certRecord.deudasTotales), accent: [245, 158, 11] }
+      ];
+
+      kpis.forEach((k, idx) => {
+        const x = 14 + idx * (kpiW + 3);
+        doc.setFillColor(255, 255, 255);
+        doc.setDrawColor(226, 232, 240);
+        doc.roundedRect(x, curY, kpiW, 20, 2.5, 2.5, 'FD');
+        doc.setFillColor(...k.accent);
+        doc.rect(x, curY, kpiW, 2, 'F');
+
+        doc.setTextColor(100, 116, 139);
+        doc.setFontSize(6.8);
+        doc.setFont(undefined, 'bold');
+        doc.text(k.label, x + 3, curY + 7.5);
+
+        doc.setTextColor(15, 23, 42);
+        doc.setFontSize(10.5);
+        doc.text(k.val, x + 3, curY + 15.5);
+      });
+
+      curY += 26;
+      doc.setTextColor(10, 25, 47);
+      doc.setFontSize(9.5);
+      doc.setFont(undefined, 'bold');
+      doc.text('1. ESTADO DE CUENTAS Y TARJETAS REGISTRADAS', 14, curY);
+
+      doc.autoTable({
+        startY: curY + 3,
+        margin: { left: 14, right: 14 },
+        head: [['Institución / Tarjeta', 'Tipo', 'Fecha Corte', 'Fecha Límite', 'Saldo Actual']],
+        body: (certRecord.cards && certRecord.cards.length)
+          ? certRecord.cards.map(c => [
+              c.name,
+              c.type,
+              c.type === 'Crédito' ? formatPrettyDate(c.cutDate) : '—',
+              c.type === 'Crédito' ? formatPrettyDate(c.payDate) : '—',
+              fmtMoney(c.balance)
+            ])
+          : [['Sin tarjetas registradas en el sistema', '—', '—', '—', '$0.00']],
+        styles: { fontSize: 8, cellPadding: 2.8, textColor: [30, 41, 59] },
+        headStyles: { fillColor: [10, 25, 47], textColor: [255, 255, 255], fontStyle: 'bold' },
+        alternateRowStyles: { fillColor: [248, 250, 252] }
+      });
+
+      const nextY = doc.lastAutoTable.finalY + 8;
+      doc.setTextColor(10, 25, 47);
+      doc.setFontSize(9.5);
+      doc.setFont(undefined, 'bold');
+      doc.text('2. DETALLE DE MOVIMIENTOS DEL PERIODO (LUNES A DOMINGO)', 14, nextY);
+
+      doc.autoTable({
+        startY: nextY + 3,
+        margin: { left: 14, right: 14 },
+        head: [['Fecha', 'Tipo', 'Concepto', 'Medio / Origen', 'Comprobante', 'Monto']],
+        body: certRecord.movements.length
+          ? certRecord.movements.map(m => [
+              m.regDate,
+              m.type,
+              m.desc,
+              m.cardName,
+              m.receipt ? m.receipt.name : '—',
+              fmtMoney(m.amount)
+            ])
+          : [['Sin movimientos registrados en este periodo', '—', '—', '—', '—', '$0.00']],
+        styles: { fontSize: 7.8, cellPadding: 2.6, textColor: [30, 41, 59] },
+        headStyles: { fillColor: [37, 99, 235], textColor: [255, 255, 255], fontStyle: 'bold' },
+        alternateRowStyles: { fillColor: [248, 250, 252] }
+      });
+
+      const dictamenY = Math.min(doc.lastAutoTable.finalY + 8, pageHeight - 36);
+      doc.setFillColor(239, 246, 255);
+      doc.setDrawColor(191, 219, 254);
+      doc.roundedRect(14, dictamenY, pageWidth - 28, 18, 2.5, 2.5, 'FD');
+
+      doc.setTextColor(10, 25, 47);
+      doc.setFontSize(8.2);
+      doc.setFont(undefined, 'bold');
+      doc.text('DICTAMEN FINANCIERO DEL SISTEMA:', 18, dictamenY + 6);
+
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(30, 41, 59);
+      doc.setFontSize(8);
+      doc.text(certRecord.aiVerdict || '', 18, dictamenY + 12, { maxWidth: pageWidth - 36 });
+
+      doc.setDrawColor(203, 213, 225);
+      doc.line(14, pageHeight - 14, pageWidth - 14, pageHeight - 14);
+      doc.setFontSize(7.2);
+      doc.setTextColor(100, 116, 139);
+      const sello = `Sello Digital SIADFI: ${btoa(unescape(encodeURIComponent(certRecord.folio + '|' + certRecord.issuedAt))).slice(0, 44)}`;
+      doc.text(sello, 14, pageHeight - 9);
+      doc.text('Documento generado automáticamente por SIADFI', pageWidth - 14, pageHeight - 9, { align: 'right' });
+
+      return doc;
+    }
+
+    function createCertificateRecord(isAuto = false) {
+      if (!window.jspdf || !window.jspdf.jsPDF) {
+        if (!isAuto) alert('No se pudo cargar jsPDF.');
+        return;
+      }
+      const snap = getCurrentSnapshot();
+      const record = {
+        id: Date.now(),
+        folio: `SIADFI-${new Date().getFullYear()}-${String(state.certificates.length + 1).padStart(4, '0')}`,
+        userName: buildFullName(state.profile),
+        profile: JSON.parse(JSON.stringify(state.profile)),
+        periodLabel: snap.week.label,
+        issuedAt: new Date().toLocaleString('es-MX') + (isAuto ? ' (Auto)' : ''),
+        status: snap.status,
+        weeklyFundBalance: snap.weeklyFundBalance,
+        liquidezTotal: snap.liquidezTotal,
+        gastos: snap.gastos,
+        ahorros: snap.ahorros,
+        deudasTotales: snap.deudasTotales,
+        aiVerdict: snap.diagnostics.pdfVerdict,
+        cards: JSON.parse(JSON.stringify(state.cards)),
+        movements: JSON.parse(JSON.stringify(snap.weekMovs))
+      };
+      state.certificates.unshift(record);
+      persist();
+      if (!isAuto) previewCertificate(record.id);
+    }
+
+    function previewCertificate(id) {
+      const cert = state.certificates.find(c => c.id === id);
+      if (!cert) return;
+      activePreviewCert = cert;
+      document.getElementById('pdfIframe').src = buildPdfDocument(cert).output('bloburl');
+      openModal('pdfPreviewModal');
+    }
+
+    function downloadCertificate(id) {
+      const cert = state.certificates.find(c => c.id === id);
+      if (!cert) return;
+      buildPdfDocument(cert).save(`${cert.folio}_Estado_Financiero.pdf`);
+    }
+
+    function printCertificate(id) {
+      const cert = state.certificates.find(c => c.id === id);
+      if (!cert) return;
+      const doc = buildPdfDocument(cert);
+      doc.autoPrint();
+      window.open(doc.output('bloburl'), '_blank');
+    }
+
+    function downloadCurrentPreview() { if (activePreviewCert) downloadCertificate(activePreviewCert.id); }
+    function printCurrentPreview() { if (activePreviewCert) printCertificate(activePreviewCert.id); }
+
+    function checkWeekendAutoCertificate() {
+      const now = new Date();
+      const day = now.getDay();
+      const week = getWeekInfo(now);
+      if ((day === 6 || day === 0) && state.lastAutoCertWeek !== week.id) {
+        state.lastAutoCertWeek = week.id;
+        createCertificateRecord(true);
+      }
+    }
+
+    // --- SNAPSHOT Y RENDERIZADO ---
+    function getCurrentSnapshot() {
+      const week = getWeekInfo();
+      const weekMovs = state.movements.filter(m => m.weekId === week.id);
+      const gastos = weekMovs.filter(m => m.type === 'Gasto').reduce((s, m) => s + m.amount, 0);
+      const ahorros = weekMovs.filter(m => m.type === 'Ahorro').reduce((s, m) => s + m.amount, 0);
+      const deudasSemana = weekMovs.filter(m => m.type === 'Deuda').reduce((s, m) => s + m.amount, 0);
+      const liquidezDebito = state.cards.filter(c => c.type === 'Débito').reduce((s, c) => s + c.balance, 0);
+      const weeklyFundBalance = Number((state.weeklyFundBalance || 0).toFixed(2));
+      const liquidezTotal = Number((liquidezDebito + weeklyFundBalance).toFixed(2));
+      const deudaCredito = state.cards.filter(c => c.type === 'Crédito').reduce((s, c) => s + c.balance, 0);
+      const deudasTotales = Number((deudasSemana + deudaCredito).toFixed(2));
+      const locked = isDebtUnpayable(deudasTotales, liquidezTotal, ahorros);
+      const status = evaluateStatus(gastos, ahorros, deudasTotales, liquidezTotal);
+      const diagnostics = computeSummaryDiagnostics(weekMovs, gastos, ahorros, deudasTotales, liquidezTotal, weeklyFundBalance, week.daysElapsed, locked);
+      return { week, weekMovs, gastos, ahorros, deudasTotales, liquidezDebito, weeklyFundBalance, liquidezTotal, status, diagnostics, locked };
+    }
+
+    function renderAll() {
+      const snap = getCurrentSnapshot();
+      const fullName = buildFullName(state.profile);
+      document.getElementById('periodLabel').innerText = `Semana: ${snap.week.label}`;
+      document.getElementById('heroLiquidity').innerText = `$${snap.liquidezTotal.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`;
+      document.getElementById('heroWeeklyFund').innerText = `$${snap.weeklyFundBalance.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`;
+      document.getElementById('heroDebitBalance').innerText = `$${snap.liquidezDebito.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`;
+
+      document.getElementById('topbarUserName').innerText = fullName;
+      document.getElementById('topbarAvatar').innerText = getInitials(fullName);
+      document.getElementById('topbarFiscalMini').innerText = state.profile.rfc
+        ? `RFC: ${state.profile.rfc}`
+        : 'Perfil fiscal';
+
+      document.getElementById('kpiFondoSemanal').innerText = `$${snap.weeklyFundBalance.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`;
+      document.getElementById('kpiGastos').innerText = `$${snap.gastos.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`;
+      document.getElementById('kpiAhorros').innerText = `$${snap.ahorros.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`;
+      document.getElementById('kpiDeudas').innerText = `$${snap.deudasTotales.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`;
+
+      refreshOtaVersionLabels();
+
+      const lockdownBanner = document.getElementById('debtLockdownBanner');
+      const btnQuickMov = document.getElementById('btnQuickMov');
+      const btnAddMovTab = document.getElementById('btnAddMovTab');
+      const btnQuickCert = document.getElementById('btnQuickCert');
+
+      if (snap.locked) {
+        lockdownBanner.style.display = 'flex';
+        document.getElementById('debtLockdownText').innerText =
+          `Tus deudas ($${snap.deudasTotales.toLocaleString('es-MX', { minimumFractionDigits: 2 })}) superan gravemente tu respaldo disponible ($${(Math.max(0, snap.liquidezTotal) + Math.max(0, snap.ahorros)).toLocaleString('es-MX', { minimumFractionDigits: 2 })}). Paga o liquida tus deudas para desbloquear gastos y las demás secciones.`;
+        if (btnQuickMov) btnQuickMov.disabled = true;
+        if (btnAddMovTab) btnAddMovTab.disabled = true;
+        if (btnQuickCert) btnQuickCert.disabled = true;
+
+        document.querySelectorAll('.nav-pill').forEach(b => {
+          b.classList.toggle('locked', b.getAttribute('data-tab') !== 'sec-tarjetas');
+        });
+        const activeSec = document.querySelector('.section.active');
+        if (activeSec && activeSec.id !== 'sec-tarjetas') {
+          goToCardsToPay();
+          return;
+        }
+      } else {
+        lockdownBanner.style.display = 'none';
+        if (btnQuickMov) btnQuickMov.disabled = false;
+        if (btnAddMovTab) btnAddMovTab.disabled = false;
+        if (btnQuickCert) btnQuickCert.disabled = false;
+        document.querySelectorAll('.nav-pill').forEach(b => b.classList.remove('locked'));
+      }
+
+      const badge = document.getElementById('statusBadge');
+      badge.innerText = snap.status.code;
+      badge.style.background = snap.status.color;
+
+      document.getElementById('summaryInsightsList').innerHTML = snap.diagnostics.summaryInsights.map(i => `
+        <li class="insight-item">
+          <span class="material-icons-round" style="color:${i.color};">${i.icon}</span>
+          <span>${escapeHtml(i.text)}</span>
+        </li>
+      `).join('');
+
+      document.getElementById('movementsAdvice').innerText = snap.diagnostics.movAdvice;
+      document.getElementById('cardsAdvice').innerText = snap.diagnostics.cardsAdvice;
+
+      const colors = { Gasto: '#ef4444', Ahorro: '#10b981', Deuda: '#f59e0b' };
+      document.getElementById('movTableBody').innerHTML = snap.weekMovs.length ? snap.weekMovs.map(m => `
+        <tr>
+          <td>${escapeHtml(m.regDate)}</td>
+          <td><span class="badge-pill" style="background:${colors[m.type] || '#64748b'};">${escapeHtml(m.type)}</span></td>
+          <td style="font-weight:600;">${escapeHtml(m.desc)}</td>
+          <td style="color:var(--text-muted);">${escapeHtml(m.cardName)}</td>
+          <td>
+            ${m.receipt
+              ? `<button class="receipt-btn" onclick="viewReceipt('${m.id}')"><span class="material-icons-round" style="font-size:14px;">receipt_long</span> Ver Recibo</button>`
+              : '<span style="color:var(--text-muted);">—</span>'}
+          </td>
+          <td><strong>$${m.amount.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</strong></td>
+          <td>
+            <button class="btn-icon" onclick="removeMovement(${m.id})" title="Eliminar">
+              <span class="material-icons-round">delete_outline</span>
+            </button>
+          </td>
+        </tr>
+      `).join('') : '<tr><td colspan="7" style="text-align:center; padding:26px; color:var(--text-muted);">Sin movimientos registrados esta semana.</td></tr>';
+
+      document.getElementById('cardsGrid').innerHTML = state.cards.length ? state.cards.map(c => {
+        const isDebit = c.type === 'Débito';
+        return `
+          <div class="bank-card-item ${isDebit ? 'debit' : 'credit'}">
+            <div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+                <div style="display:flex; align-items:center; gap:10px;">
+                  <div class="card-chip-emv"></div>
+                  <span style="font-size:0.72rem; font-weight:800; letter-spacing:1px; background:rgba(255,255,255,0.16); padding:3px 9px; border-radius:999px;">
+                    ${escapeHtml(c.type.toUpperCase())}
+                  </span>
+                </div>
+                <button class="btn-icon" style="color:rgba(255,255,255,0.8);" onclick="removeCard(${c.id})" title="Eliminar tarjeta">
+                  <span class="material-icons-round">delete_outline</span>
+                </button>
+              </div>
+
+              <div style="font-size:1.1rem; font-weight:700; opacity:0.95; margin-bottom:4px;">${escapeHtml(c.name)}</div>
+              <div style="font-size:0.72rem; opacity:0.75; text-transform:uppercase; letter-spacing:0.5px;">
+                ${isDebit ? 'Saldo Disponible' : 'Deuda Actual'}
+              </div>
+              <div style="font-size:1.75rem; font-weight:800; letter-spacing:-0.6px; margin-top:2px;">
+                $${c.balance.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+              </div>
+
+              ${!isDebit
+                ? `<div style="display:flex; gap:16px; font-size:0.76rem; opacity:0.88; margin-top:12px; background:rgba(0,0,0,0.2); padding:8px 12px; border-radius:10px;">
+                    <div><span style="opacity:0.7;">Corte:</span> <strong>${formatPrettyDate(c.cutDate)}</strong></div>
+                    <div><span style="opacity:0.7;">Límite:</span> <strong>${formatPrettyDate(c.payDate)}</strong></div>
+                  </div>`
+                : `<div style="font-size:0.78rem; opacity:0.8; margin-top:12px;">Cuenta activa para transferencias y gastos</div>`
+              }
+            </div>
+
+            ${!isDebit
+              ? `<div class="card-actions-footer">
+                  <button class="btn btn-amber" style="flex:1; justify-content:center; padding:9px 12px; font-size:0.8rem;" onclick="openUpdateDebtModal(${c.id})">
+                    <span class="material-icons-round" style="font-size:16px;">edit</span> Actualizar Deuda
+                  </button>
+                  ${c.balance > 0
+                    ? `<button class="btn btn-emerald" style="flex:1; justify-content:center; padding:9px 12px; font-size:0.8rem;" onclick="openPayCardModal(${c.id})">
+                        <span class="material-icons-round" style="font-size:16px;">payments</span> Pagar
+                      </button>`
+                    : `<div style="flex:1; display:flex; align-items:center; justify-content:center; font-size:0.78rem; font-weight:700; background:rgba(16,185,129,0.25); border-radius:10px; padding:8px;">Al corriente</div>`
+                  }
+                </div>`
+              : ''
+            }
+          </div>
+        `;
+      }).join('') : '<p style="color:var(--text-muted); grid-column:1/-1; text-align:center; padding:20px;">Aún no has agregado tarjetas a tu billetera.</p>';
+
+      document.getElementById('certTableBody').innerHTML = state.certificates.length ? state.certificates.map(cert => `
+        <tr>
+          <td><strong>${escapeHtml(cert.folio)}</strong></td>
+          <td>${escapeHtml(cert.periodLabel)}</td>
+          <td>${escapeHtml(cert.issuedAt)}</td>
+          <td><span class="badge-pill" style="background:${cert.status.color};">${escapeHtml(cert.status.code)}</span></td>
+          <td>
+            <button class="btn-icon" onclick="previewCertificate(${cert.id})" title="Ver PDF">
+              <span class="material-icons-round">visibility</span>
+            </button>
+            <button class="btn-icon" onclick="downloadCertificate(${cert.id})" title="Descargar">
+              <span class="material-icons-round">download</span>
+            </button>
+            <button class="btn-icon" onclick="printCertificate(${cert.id})" title="Imprimir">
+              <span class="material-icons-round">print</span>
+            </button>
+          </td>
+        </tr>
+      `).join('') : '<tr><td colspan="5" style="text-align:center; padding:26px; color:var(--text-muted);">Aún no hay constancias emitidas.</td></tr>';
+
+      const ctx = document.getElementById('financeChart').getContext('2d');
+      if (chartObj) chartObj.destroy();
+      const isDark = document.body.classList.contains('theme-dark');
+      chartObj = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Fondo Semanal', 'Gastos', 'Ahorros', 'Deudas Crédito'],
+          datasets: [{
+            data: [snap.weeklyFundBalance, snap.gastos, snap.ahorros, snap.deudasTotales],
+            backgroundColor: ['#2563eb', '#ef4444', '#10b981', '#f59e0b'],
+            borderWidth: 2,
+            borderColor: isDark ? '#111827' : '#ffffff'
+          }]
+        },
+        options: {
+          responsive: true,
+          cutout: '68%',
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                usePointStyle: true,
+                padding: 16,
+                color: isDark ? '#f1f5f9' : '#0f172a',
+                font: { family: 'Plus Jakarta Sans', weight: '600' }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // --- ARRANCAR SECUENCIA ---
+    startAppBootSequence();
+  </script>
+</body>
+</html>
